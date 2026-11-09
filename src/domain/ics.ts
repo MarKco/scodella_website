@@ -98,7 +98,7 @@ export function buildCalendar(opts: CalendarOptions): string {
   add('CALSCALE:GREGORIAN');
   add('METHOD:PUBLISH');
   add(`X-WR-CALNAME:${escapeText(`Scodella · ${title}`)}`);
-  add(`X-WR-CALDESC:${escapeText(`Menu della mensa scolastica (${title}), Comune di Venezia. Sito non ufficiale: fa fede il menu del Comune.`)}`);
+  add(`X-WR-CALDESC:${escapeText(`Menu della mensa scolastica (${title}), Comune di Venezia. Sito indipendente, non affiliato al Comune: fa fede il menu del Comune.`)}`);
   add('X-WR-TIMEZONE:Europe/Rome');
   add('REFRESH-INTERVAL;VALUE=DURATION:PT1H');
   add('X-PUBLISHED-TTL:PT1H');

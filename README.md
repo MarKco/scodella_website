@@ -3,7 +3,7 @@
 Sito statico e PWA con i menu delle scuole dell'infanzia e primarie del Comune di Venezia: la versione web dell'app Android
 [Scodella](https://github.com/MarKco/scodella). Gira su GitHub Pages: **https://markco.github.io/scodella_website/**
 
-Non è un sito ufficiale del Comune di Venezia.
+Sito indipendente, non affiliato al Comune di Venezia.
 
 ## Cosa fa
 
