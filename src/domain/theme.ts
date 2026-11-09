@@ -46,32 +46,33 @@ export function readable(base: RGB, backgrounds: RGB[], toward: RGB, min = 4.5):
 
 export function accentScheme(hex: string | null | undefined, dark: boolean): Record<string, string> {
   const a = parseHex(hex);
-  const night = lerp([0x28, 0x21, 0x1f], a, 0.03);
+  // Scuro ad alto contrasto: fondo quasi nero, testo quasi bianco, superfici ben staccate tra loro e bordi netti.
+  const night = lerp([0x14, 0x10, 0x0f], a, 0.03);
   const grey: RGB = [0x8a, 0x80, 0x78];
   const s = dark
     ? {
-        primary: lerp(a, WHITE, 0.42),
-        'on-primary': lerp(a, BLACK, 0.78),
-        'primary-container': lerp(a, BLACK, 0.5),
-        'on-primary-container': lerp(a, WHITE, 0.82),
-        secondary: lerp(a, WHITE, 0.6),
-        'secondary-container': lerp(a, BLACK, 0.62),
-        'on-secondary-container': lerp(a, WHITE, 0.82),
-        tertiary: [0xa8, 0xd4, 0x8f] as RGB,
+        primary: lerp(a, WHITE, 0.5),
+        'on-primary': lerp(a, BLACK, 0.85),
+        'primary-container': lerp(a, BLACK, 0.4),
+        'on-primary-container': lerp(a, WHITE, 0.92),
+        secondary: lerp(a, WHITE, 0.72),
+        'secondary-container': lerp(a, BLACK, 0.55),
+        'on-secondary-container': lerp(a, WHITE, 0.92),
+        tertiary: [0xb9, 0xe6, 0xa0] as RGB,
         'tertiary-container': [0x2f, 0x53, 0x20] as RGB,
-        'on-tertiary-container': [0xd7, 0xeb, 0xc8] as RGB,
+        'on-tertiary-container': [0xe6, 0xf5, 0xd9] as RGB,
         background: night,
-        'on-background': lerp(a, WHITE, 0.9),
+        'on-background': lerp(a, WHITE, 0.96),
         surface: night,
-        'on-surface': lerp(a, WHITE, 0.9),
-        'surface-variant': lerp(night, WHITE, 0.12),
-        'on-surface-variant': lerp(a, WHITE, 0.72),
-        'surface-low': lerp(night, WHITE, 0.06),
-        'surface-container': lerp(night, WHITE, 0.08),
-        'surface-high': lerp(night, WHITE, 0.11),
-        outline: lerp(a, WHITE, 0.5),
-        'outline-variant': lerp(night, WHITE, 0.2),
-        'primary-text': readable(lerp(a, WHITE, 0.42), [night, lerp(night, WHITE, 0.06), lerp(night, WHITE, 0.08), lerp(night, WHITE, 0.11), lerp(night, WHITE, 0.12), lerp(a, BLACK, 0.5)], WHITE),
+        'on-surface': lerp(a, WHITE, 0.96),
+        'surface-variant': lerp(night, WHITE, 0.14),
+        'on-surface-variant': lerp(a, WHITE, 0.85),
+        'surface-low': lerp(night, WHITE, 0.07),
+        'surface-container': lerp(night, WHITE, 0.1),
+        'surface-high': lerp(night, WHITE, 0.13),
+        outline: lerp(a, WHITE, 0.68),
+        'outline-variant': lerp(night, WHITE, 0.28),
+        'primary-text': readable(lerp(a, WHITE, 0.5), [night, lerp(night, WHITE, 0.07), lerp(night, WHITE, 0.1), lerp(night, WHITE, 0.13), lerp(night, WHITE, 0.14), lerp(a, BLACK, 0.4)], WHITE),
       }
     : {
         primary: a,

@@ -44,28 +44,28 @@
 /* Tema scuro di sistema: valori di partenza (menu autunnale) già nel CSS, così la prima pittura non è chiara. Poi li sostituisce theme.ts. */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
-    --primary: rgb(212 154 125);
-    --on-primary: rgb(40 18 7);
-    --primary-container: rgb(91 40 15);
-    --on-primary-container: rgb(242 224 215);
-    --secondary: rgb(225 185 165);
-    --secondary-container: rgb(69 30 11);
-    --on-secondary-container: rgb(242 224 215);
-    --tertiary: rgb(168 212 143);
+    --primary: rgb(218 168 143);
+    --on-primary: rgb(27 12 5);
+    --primary-container: rgb(109 48 18);
+    --on-primary-container: rgb(249 241 237);
+    --secondary: rgb(234 206 192);
+    --secondary-container: rgb(81 36 14);
+    --on-secondary-container: rgb(249 241 237);
+    --tertiary: rgb(185 230 160);
     --tertiary-container: rgb(47 83 32);
-    --on-tertiary-container: rgb(215 235 200);
-    --background: rgb(44 34 31);
-    --on-background: rgb(248 238 233);
-    --surface: rgb(44 34 31);
-    --on-surface: rgb(248 238 233);
-    --surface-variant: rgb(69 61 58);
-    --on-surface-variant: rgb(234 206 192);
-    --surface-low: rgb(57 47 44);
-    --surface-container: rgb(61 52 49);
-    --surface-high: rgb(67 58 56);
-    --outline: rgb(218 168 143);
-    --outline-variant: rgb(86 78 76);
-    --primary-text: rgb(214 158 130);
+    --on-tertiary-container: rgb(230 245 217);
+    --background: rgb(25 18 15);
+    --on-background: rgb(252 248 246);
+    --surface: rgb(25 18 15);
+    --on-surface: rgb(252 248 246);
+    --surface-variant: rgb(57 51 49);
+    --on-surface-variant: rgb(244 229 221);
+    --surface-low: rgb(41 35 32);
+    --surface-container: rgb(48 42 39);
+    --surface-high: rgb(55 49 46);
+    --outline: rgb(231 199 183);
+    --outline-variant: rgb(89 84 82);
+    --primary-text: rgb(218 168 143);
   }
 }
 
