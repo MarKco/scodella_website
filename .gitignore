@@ -1,0 +1,13 @@
+node_modules/
+dist/
+*.local
+.DS_Store
+coverage/
+.vite/
+# generato dall'Action (scripts/fetch-feed.mjs); uno di prova si può tenere in locale
+public/data/feed.json
+# calendari .ics: generati dall'Action (npm run calendars)
+public/calendars/
+
+# grafiche social (SVG/PNG, script e screenshot): restano solo in locale
+docs/social/

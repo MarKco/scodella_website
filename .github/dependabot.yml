@@ -1,0 +1,13 @@
+# Aggiorna da solo (con una pull request da approvare) le azioni di GitHub del workflow, fissate allo SHA del commit.
+# Una PR a settimana al massimo, con tutte le azioni insieme. Solo azioni: i pacchetti npm non sono coperti.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      github-actions:
+        patterns: ['*']
+    commit-message:
+      prefix: ci

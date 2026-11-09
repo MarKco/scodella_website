@@ -1,0 +1,27 @@
+{
+  "name": "scodella-website",
+  "private": true,
+  "version": "0.4.0",
+  "type": "module",
+  "description": "Sito/PWA con i menu delle mense scolastiche del Comune di Venezia (companion web dell'app Scodella)",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "sync": "node scripts/sync-from-app.mjs",
+    "feed": "node scripts/fetch-feed.mjs",
+    "icons": "node scripts/make-icons.mjs",
+    "calendars": "vite-node scripts/build-calendars.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^24.19.2",
+    "axe-core": "^4.14.0",
+    "jsdom": "^27.4.0",
+    "typescript": "^5.9.3",
+    "vite": "^7.1.0",
+    "vite-node": "^3.2.4",
+    "vite-plugin-pwa": "^1.0.3",
+    "vitest": "^5.1.0"
+  }
+}

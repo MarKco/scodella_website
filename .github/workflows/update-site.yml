@@ -1,0 +1,122 @@
+name: Aggiorna sito
+
+# Rigenera e pubblica il sito su GitHub Pages quando:
+#  - cambia qualcosa nel repo (push su main);
+#  - cambia il feed della mensa su Firestore (controllo ogni ora, 1 sola lettura Firestore se nulla è cambiato);
+#  - lo chiedi a mano o lo script di pubblicazione dell'app (gh workflow run update-site.yml).
+# Nessun secret oltre alla chiave API di sola lettura FIRESTORE_API_KEY (vedi README). Il deploy usa il GITHUB_TOKEN automatico.
+#
+# Sicurezza: ogni job ha solo i permessi che gli servono (il job che installa i pacchetti npm e compila non può scrivere sul repo; solo il
+# keepalive può, e non esegue codice di terzi) e le azioni sono fissate allo SHA del commit, non a un tag che qualcuno potrebbe spostare.
+# Le versioni si aggiornano con le pull request di Dependabot (.github/dependabot.yml): il commento accanto allo SHA dice quale versione è.
+
+on:
+  push:
+    branches: [main]
+    paths-ignore: ['**.md', '.gitignore', 'LICENSE']
+  schedule:
+    # Una volta all'ora, al minuto 7 (evita le ore piene, quando i cron di GitHub sono più in ritardo).
+    - cron: '7 * * * *'
+  workflow_dispatch:
+    inputs:
+      force:
+        description: 'Rileggi il feed completo anche se la versione non è cambiata'
+        type: boolean
+        default: false
+
+# Di base nessun permesso di scrittura: ogni job dichiara i suoi.
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read # il codice si legge soltanto
+      pages: write # pubblicare su GitHub Pages
+      id-token: write # richiesto da deploy-pages
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false # il token non resta nel repo locale mentre girano npm e gli script
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Leggi il feed della mensa (Firestore)
+        id: feed
+        env:
+          FIRESTORE_API_KEY: ${{ secrets.FIRESTORE_API_KEY }}
+          FORCE: ${{ inputs.force }}
+        run: |
+          owner="${GITHUB_REPOSITORY_OWNER,,}"
+          repo="${GITHUB_REPOSITORY#*/}"
+          args=(--site-url "https://${owner}.github.io/${repo}/")
+          if [ "$FORCE" = "true" ]; then args+=(--force); fi
+          node scripts/fetch-feed.mjs "${args[@]}"
+
+      # Con il solo cron e nessuna novità si esce qui: niente build, niente deploy.
+      - name: Installa
+        if: github.event_name != 'schedule' || steps.feed.outputs.changed == 'true'
+        run: npm ci
+
+      - name: Test
+        if: github.event_name != 'schedule' || steps.feed.outputs.changed == 'true'
+        run: npm test
+
+      - name: Genera i calendari (.ics)
+        if: github.event_name != 'schedule' || steps.feed.outputs.changed == 'true'
+        run: |
+          owner="${GITHUB_REPOSITORY_OWNER,,}"
+          repo="${GITHUB_REPOSITORY#*/}"
+          SITE_URL="https://${owner}.github.io/${repo}/" npm run calendars
+
+      - name: Build
+        if: github.event_name != 'schedule' || steps.feed.outputs.changed == 'true'
+        run: npm run build
+
+      - uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
+        if: github.event_name != 'schedule' || steps.feed.outputs.changed == 'true'
+
+      - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        if: github.event_name != 'schedule' || steps.feed.outputs.changed == 'true'
+        with:
+          path: dist
+
+      - name: Pubblica su GitHub Pages
+        id: deployment
+        if: github.event_name != 'schedule' || steps.feed.outputs.changed == 'true'
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
+
+  # GitHub disattiva i workflow schedulati dopo 60 giorni senza attività nel repo. Un commit vuoto sul ramo `keepalive` ogni ~3 settimane
+  # la tiene viva senza sporcare la cronologia di main. Job a parte perché è l'unico che deve poter scrivere sul repo: non installa
+  # pacchetti e non esegue codice del progetto, solo `git`.
+  keepalive:
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    concurrency:
+      group: keepalive
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Commit vuoto sul ramo keepalive
+        run: |
+          git fetch --depth=1 origin keepalive:refs/remotes/origin/keepalive 2>/dev/null || true
+          last=$(git log -1 --format=%ct origin/keepalive 2>/dev/null || echo 0)
+          if [ $(( $(date +%s) - last )) -gt $(( 21 * 86400 )) ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git commit --allow-empty -m "keepalive"
+            git push --force origin HEAD:refs/heads/keepalive
+          fi
