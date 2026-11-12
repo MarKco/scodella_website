@@ -11,3 +11,6 @@ public/calendars/
 
 # grafiche social (SVG/PNG, script e screenshot): restano solo in locale
 docs/social/
+
+# ambiente Python per le grafiche social
+.venv/
