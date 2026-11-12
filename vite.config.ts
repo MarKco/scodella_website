@@ -39,7 +39,8 @@ export default defineConfig({
     cspPlugin(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['icons/icon.svg', 'icons/apple-touch-icon.png', 'icons/favicon-32.png'],
+      // Le icone sono già in globPatterns: senza questo finirebbero due volte nel precache.
+      includeManifestIcons: false,
       manifest: {
         name: 'Scodella – Menu mense di Venezia',
         short_name: 'Scodella',
@@ -60,10 +61,13 @@ export default defineConfig({
         ],
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,json,svg,png,woff2,webmanifest}'],
-        // Il feed cambia senza deploy del sito: mai nel precache, sempre prima dalla rete.
-        globIgnores: ['data/feed.json', 'badges/**', 'calendars/**'],
+        globPatterns: ['**/*.{js,css,html,json,svg,png,woff2}'], // il manifest lo aggiunge il plugin
+        // Il feed cambia senza deploy del sito: mai nel precache, sempre prima dalla rete. Delle lingue solo it/en (la lingua di
+        // partenza e il ripiego): le altre si scaricano quando servono e restano in cache (vedi runtimeCaching).
+        globIgnores: ['data/feed.json', 'badges/**', 'calendars/**', 'data/extra/**', 'data/lang/!(it|en).json'],
         navigateFallback: `${base}index.html`,
+        // Aprire nel browser un calendario (.ics) o un file di dati deve dare il file, non la pagina dell'app.
+        navigateFallbackDenylist: [new RegExp(`^${base}(calendars|data)/`)],
         cleanupOutdatedCaches: true,
         runtimeCaching: [
           {
@@ -71,6 +75,12 @@ export default defineConfig({
             urlPattern: ({ url }: { url: URL }) => url.pathname.includes('/badges/'),
             handler: 'CacheFirst',
             options: { cacheName: 'scodella-badges', expiration: { maxEntries: 10 } },
+          },
+          {
+            // Le lingue fuori dal precache: subito dalla cache se c'è, aggiornate in background.
+            urlPattern: ({ url }: { url: URL }) => /\/data\/(lang|extra)\/[a-z]+\.json$/.test(url.pathname),
+            handler: 'StaleWhileRevalidate',
+            options: { cacheName: 'scodella-lang', expiration: { maxEntries: 20 } },
           },
           {
             urlPattern: ({ url }: { url: URL }) => url.pathname.endsWith('/data/feed.json'),

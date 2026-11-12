@@ -511,7 +511,7 @@ async function boot(): Promise<void> {
   let prefs = loadPrefs();
   const urlLang = parseState(location.search).lang;
   const lang = urlLang && LANGS.some((l) => l.code === urlLang) ? urlLang : (prefs.lang ?? detectLang());
-  const [data, pack, fallback, feedResult] = await Promise.all([loadStatic(), loadPack(lang), loadPack('en'), loadFeed()]);
+  const [data, pack, fallback, feedResult] = await Promise.all([loadStatic(), loadPack(lang), loadPack('en'), loadFeed(true)]);
   prefs = mergeUrlState(prefs, data.menus.map((m) => m.id), location.search, isStandalone());
   savePrefs(prefs);
   state = build({ data, pack, fallback, feed: feedResult.feed, feedOk: feedResult.ok, prefs });
@@ -521,8 +521,9 @@ async function boot(): Promise<void> {
   render();
   setupGestures();
   registerSW({ immediate: true });
-  // Il feed in cache può essere vecchio: subito una lettura fresca.
-  void refreshFeed();
+  // Le lingue diverse da it/en non sono nel precache: alla prima visita il pack si è scaricato prima che il service worker
+  // controllasse la pagina, quindi lo si richiede una volta attraverso di lui perché resti disponibile offline.
+  navigator.serviceWorker?.addEventListener('controllerchange', () => void loadPack(state.i18n.lang), { once: true });
 }
 
 boot().catch((e) => {
