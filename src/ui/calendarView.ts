@@ -1,9 +1,7 @@
 import { h } from '../dom';
-import { badges } from '../domain/content';
 import { addDays, daysInMonth, isoWeekday, type ISODate } from '../domain/dates';
 import { effectiveMoves, effectiveVariations } from '../domain/feed';
 import type { Ctx } from './ctx';
-import { kindEmoji } from './kinds';
 import { icon } from './icons';
 
 const pad = (n: number) => String(n).padStart(2, '0');
@@ -51,7 +49,6 @@ export function monthGrid(ctx: Ctx, month: string, opts: GridOptions = {}): HTML
     const closure = model.closure(d);
     const content = model.content(d);
     const hasChange = (changed.get(d)?.size ?? 0) > 0 && !!content && content.entries.some((e) => e.replaced || e.deleted);
-    const kind = content ? badges(content.entries)[0] : undefined;
     const names = content && opts.dishes ? content.entries.filter((e) => e.category === 'PRIMO' || e.category === 'SECONDO').slice(0, 2) : [];
     const cls = ['cal-cell', weekend && 'weekend', closure && !weekend && 'closed', d === ctx.today && 'today', d === opts.selected && 'on']
       .filter(Boolean)
@@ -63,7 +60,6 @@ export function monthGrid(ctx: Ctx, month: string, opts: GridOptions = {}): HTML
       d === ctx.today && h('span', { class: 'sr-only' }, ` · ${i18n.t('today')}`),
       closure && !weekend && h('span', { class: 'sr-only' }, ` · ${i18n.t('calendar_closed')}`),
       hasChange && h('span', { class: 'sr-only' }, ` · ${i18n.t('calendar_variation')}`),
-      kind && h('span', { class: 'cal-kind', 'aria-hidden': 'true' }, kindEmoji(kind)),
       hasChange && h('span', { class: 'cal-dot', 'aria-hidden': 'true' }),
       names.length > 0 && h('span', { class: 'cal-dishes' }, names.map((e) => h('span', { class: `cal-dish${e.replaced ? ' replaced' : ''}` }, e.deleted ? e.original : e.text))),
     ];

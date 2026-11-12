@@ -6,7 +6,6 @@ import type { ISODate } from '../domain/dates';
 import type { Ctx } from './ctx';
 import { icon } from './icons';
 import { openSheet, pill } from './components';
-import { kindEmoji } from './kinds';
 import { issueUrl, safeHttpUrl } from '../links';
 
 const allergenLabel = (ctx: Ctx, code: string) => {
@@ -21,7 +20,7 @@ export function openDishSheet(ctx: Ctx, e: DishEntry, date: ISODate): void {
   const shown = e.deleted ? e.original : e.text;
 
   const meta = h('div', { class: 'sheet-meta' }, pill(i18n.t(`category_${e.category.toLowerCase()}`)));
-  if (e.kind) meta.append(pill(`${kindEmoji(e.kind)} ${i18n.t(`kind_${e.kind.toLowerCase()}`)}`, 'pill-kind'));
+  if (e.kind) meta.append(pill(i18n.t(`kind_${e.kind.toLowerCase()}`), 'pill-kind'));
   if (e.eggs && !e.deleted) meta.append(pill(`🥚 ${i18n.t('allergen_eggs')}`));
   if (model.menu?.diet) meta.append(pill(model.names.menuTitle(model.menu)));
   body.push(meta);

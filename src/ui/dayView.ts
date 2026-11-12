@@ -1,13 +1,13 @@
 import { h } from '../dom';
 import { badges, FOODS, type DishEntry, type Food } from '../domain/content';
 import { addDays, isWeekend, mondayOf, toISO, type ISODate } from '../domain/dates';
+import type { DishKind } from '../domain/types';
 import { lastDay } from '../domain/menus';
 import { webcalUrl } from '../links';
 import type { Ctx } from './ctx';
 import { icon } from './icons';
 import { pill } from './components';
 import { miniMonth } from './calendarView';
-import { kindEmoji } from './kinds';
 
 /** Il giorno ha piatti variati o eliminati dalla mensa, oppure è uno spostamento. */
 function isVaried(ctx: Ctx, d: ISODate): boolean {
@@ -51,7 +51,7 @@ function header(ctx: Ctx, date: ISODate): HTMLElement {
       date === ctx.today && pill(i18n.t('today'), 'pill-primary'),
       week && pill(i18n.t('week_label', week)),
       varied > 0 && pill(varied === 1 ? i18n.t('varied_one') : i18n.t('varied_many', varied), 'pill-alert'),
-      kinds.map((k) => pill(`${kindEmoji(k)} ${i18n.t(`kind_${k.toLowerCase()}`)}`, 'pill-kind')),
+      kinds.map((k) => pill(i18n.t(`kind_${k.toLowerCase()}`), 'pill-kind')),
     ),
   );
 }
@@ -107,11 +107,12 @@ export function controls(ctx: Ctx, date: ISODate, base = ''): HTMLElement {
   );
 }
 
+/** Icona accanto al piatto: solo carne, pesce, affettati e vegano (il resto, vegetariano compreso, non ne ha). */
+const DISH_ICON: Partial<Record<DishKind, string>> = { MEAT: '🍗', FISH: '🐟', COLD_CUTS: '🥓', VEGAN: '🌱' };
+
 function dishRow(ctx: Ctx, e: DishEntry, date: ISODate): HTMLElement {
   const { i18n } = ctx;
-  const kinds: string[] = [];
-  if (e.kind) kinds.push(kindEmoji(e.kind));
-  if (e.eggs && !e.deleted) kinds.push('🥚');
+  const kind = e.kind && !e.deleted && DISH_ICON[e.kind] ? e.kind : null;
   const main = h(
     'div',
     { class: 'dish-main' },
@@ -121,13 +122,17 @@ function dishRow(ctx: Ctx, e: DishEntry, date: ISODate): HTMLElement {
     e.deleted && h('div', { class: 'dish-sub strong' }, i18n.t('dish_deleted')),
     e.note && !e.deleted && h('div', { class: 'dish-note' }, e.note),
   );
-  const side = h('div', { class: 'dish-kind', 'aria-hidden': 'true' }, kinds.join(' '));
-  // Le icone sono solo visive: lo stesso dato, a parole, per chi non le vede.
-  const spoken = [e.kind && !e.deleted ? i18n.t(`kind_${e.kind.toLowerCase()}`) : null, e.eggs && !e.deleted ? i18n.t('allergen_eggs') : null].filter(Boolean).join(', ');
   return h(
     'li',
     { class: `dish${e.replaced ? ' replaced' : ''}${e.deleted ? ' deleted' : ''}` },
-    h('button', { class: 'dish-btn', onclick: () => ctx.openDish(e, date) }, main, side, spoken && h('span', { class: 'sr-only' }, `. ${spoken}`)),
+    h(
+      'button',
+      { class: 'dish-btn', onclick: () => ctx.openDish(e, date) },
+      main,
+      kind && h('div', { class: 'dish-kind', 'aria-hidden': 'true' }, DISH_ICON[kind]),
+      // L'icona è solo visiva: lo stesso dato, a parole, per chi non la vede.
+      kind && h('span', { class: 'sr-only' }, `. ${i18n.t(`kind_${kind.toLowerCase()}`)}`),
+    ),
   );
 }
 
@@ -180,7 +185,6 @@ function weekOverview(ctx: Ctx, date: ISODate): HTMLElement {
   const card = (d: ISODate) => {
     const content = model.content(d);
     const closure = model.closure(d);
-    const kinds = content ? badges(content.entries) : [];
     const shown = content ? content.entries : [];
     const changed = isVaried(ctx, d);
     const cls = `week-card${d === date ? ' on' : ''}${d === ctx.today ? ' today' : ''}${closure ? ' closed' : ''}${changed ? ' varied' : ''}`;
@@ -190,7 +194,7 @@ function weekOverview(ctx: Ctx, date: ISODate): HTMLElement {
         { class: 'week-card-head' },
         h('span', { class: 'week-wd' }, i18n.weekday(d, 'short')),
         h('span', { class: 'week-num' }, String(+d.slice(8))),
-        h('span', { class: 'week-marks', 'aria-hidden': 'true' }, kinds.map((k) => kindEmoji(k)).join(' '), content?.moved ? ' ↔' : '', changed ? ' •' : ''),
+        h('span', { class: 'week-marks', 'aria-hidden': 'true' }, content?.moved ? '↔' : '', changed ? ' •' : ''),
       ),
       closure
         ? h('p', { class: 'week-closed' }, closure.reason || i18n.t('closure_title'))
