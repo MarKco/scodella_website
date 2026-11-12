@@ -7,6 +7,8 @@ import { sanitizePrefs } from '../src/prefs';
 import { viewChanged } from '../src/route';
 import { contrast, accentScheme, parseHex, readable, type RGB } from '../src/domain/theme';
 import { escapeText } from '../src/domain/ics';
+import { EMPTY_PACK } from '../src/domain/types';
+import { I18n } from '../src/i18n';
 
 describe('h(): attributi ARIA booleani', () => {
   it('true e false diventano "true" e "false" (mai omessi o vuoti)', () => {
@@ -116,5 +118,21 @@ describe('contrasto del testo con l\'accento', () => {
 describe('calendario: testo sicuro', () => {
   it('toglie i caratteri di controllo e converte ogni forma di a capo', () => {
     expect(escapeText('a\rb\u0000c\u0007d\r\ne\nf')).toBe('a\\nbcd\\ne\\nf');
+  });
+});
+
+describe('I18n', () => {
+  it('un testo del sito nella lingua scelta vince sul pack inglese di ripiego', () => {
+    const en = { ...EMPTY_PACK, ui: { family_all: 'All (app)', only_en: 'English only' } };
+    const i18n = new I18n('it', EMPTY_PACK, en);
+    expect(i18n.t('family_all')).toBe('Tutti');
+    expect(i18n.t('only_en')).toBe('English only');
+  });
+  it('date formattate uguali anche riusando i formatter', () => {
+    const i18n = new I18n('it', EMPTY_PACK, EMPTY_PACK);
+    expect(i18n.weekday('2026-11-09')).toBe('lunedì');
+    expect(i18n.weekday('2026-11-10')).toBe('martedì');
+    expect(i18n.weekday('2026-11-10', 'short')).toBe('mar');
+    expect(i18n.dateLong('2026-11-10')).toBe('10 novembre 2026');
   });
 });

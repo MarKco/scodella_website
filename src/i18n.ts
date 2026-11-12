@@ -334,8 +334,18 @@ export class I18n {
     return localeOf(this.lang);
   }
 
+  /** Prima la lingua scelta (testi dell'app, poi del sito), poi l'inglese (app, poi sito). */
   private raw(key: string): UiString | undefined {
-    return this.pack.ui[key] ?? this.fallback.ui[key] ?? EXTRA[this.lang as 'it' | 'en']?.[key] ?? EXTRA.en[key];
+    return this.pack.ui[key] ?? EXTRA[this.lang as 'it' | 'en']?.[key] ?? this.fallback.ui[key] ?? EXTRA.en[key];
+  }
+
+  /** Un formatter per combinazione di opzioni: crearne uno è costoso e a ogni ridisegno se ne usano centinaia. */
+  private readonly formats = new Map<string, Intl.DateTimeFormat>();
+  private fmt(options: Intl.DateTimeFormatOptions): Intl.DateTimeFormat {
+    const key = JSON.stringify(options);
+    let f = this.formats.get(key);
+    if (!f) this.formats.set(key, (f = new Intl.DateTimeFormat(this.locale, options)));
+    return f;
   }
 
   /** Stringa con segnaposto `%1$s`, `%2$s`. Una chiave mancante si vede come tale (utile in sviluppo). */
@@ -356,19 +366,19 @@ export class I18n {
   }
 
   weekday(iso: string, style: 'long' | 'short' | 'narrow' = 'long'): string {
-    return new Intl.DateTimeFormat(this.locale, { weekday: style, timeZone: 'UTC' }).format(new Date(`${iso}T00:00:00Z`));
+    return this.fmt({ weekday: style, timeZone: 'UTC' }).format(new Date(`${iso}T00:00:00Z`));
   }
   dateLong(iso: string): string {
-    return new Intl.DateTimeFormat(this.locale, { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(`${iso}T00:00:00Z`));
+    return this.fmt({ day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(`${iso}T00:00:00Z`));
   }
   dateShort(iso: string): string {
-    return new Intl.DateTimeFormat(this.locale, { day: 'numeric', month: 'short', timeZone: 'UTC' }).format(new Date(`${iso}T00:00:00Z`));
+    return this.fmt({ day: 'numeric', month: 'short', timeZone: 'UTC' }).format(new Date(`${iso}T00:00:00Z`));
   }
   month(year: number, month0: number): string {
-    return new Intl.DateTimeFormat(this.locale, { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(Date.UTC(year, month0, 1)));
+    return this.fmt({ month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(Date.UTC(year, month0, 1)));
   }
   dateTime(ms: number): string {
-    return new Intl.DateTimeFormat(this.locale, { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }).format(new Date(ms));
+    return this.fmt({ day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }).format(new Date(ms));
   }
   number(n: number): string {
     return new Intl.NumberFormat(this.locale).format(n);
