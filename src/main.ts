@@ -464,8 +464,8 @@ function setupGestures(): void {
     { passive: true },
   );
   document.addEventListener('keydown', (e) => {
-    const t = e.target as HTMLElement;
-    if (e.altKey || e.ctrlKey || e.metaKey || /INPUT|SELECT|TEXTAREA/.test(t.tagName) || document.querySelector('dialog[open]')) return;
+    // Dentro campi e zone che scorrono di lato (tabella «Tutti», chip) le frecce servono a loro, non a cambiare giorno.
+    if (e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey || e.shiftKey || document.querySelector('dialog[open]') || inNoSwipeZone(e.target as Element | null)) return;
     const r = parseRoute();
     if ((r.name !== 'day' && r.name !== 'family') || (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight')) return;
     location.hash = `#${dayBase(r)}/${state.model.step(r.date, e.key === 'ArrowRight' ? 1 : -1)}`;
@@ -481,8 +481,10 @@ async function refreshFeed(): Promise<void> {
   const today = currentToday();
   const { feed, ok } = await loadFeed(true);
   if (ok && feed.version !== state.feed.version) {
+    // «Menu aggiornato» solo se prima c'era un feed: alla prima lettura riuscita (avvio offline) non è cambiato niente per l'utente.
+    const hadFeed = state.feedOk;
     update({ feed, feedOk: true });
-    toast(state.i18n.t('menu_changed_notice'));
+    if (hadFeed) toast(state.i18n.t('menu_changed_notice'));
   } else if (today !== state.today) {
     update({});
   }
@@ -491,7 +493,11 @@ document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'visible' && Date.now() - lastRefresh > 2 * 60_000) void refreshFeed();
 });
 window.setInterval(() => void refreshFeed(), 10 * 60_000);
-window.addEventListener('online', () => void refreshFeed());
+window.addEventListener('online', () => {
+  if (!state) return;
+  render(); // via l'avviso «offline» anche se il feed non è cambiato
+  void refreshFeed();
+});
 window.addEventListener('offline', () => state && render());
 
 window.addEventListener('beforeinstallprompt', (e) => {
