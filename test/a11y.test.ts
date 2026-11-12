@@ -71,6 +71,18 @@ describe('accessibilità (axe-core)', () => {
     expect(await violations(el)).toEqual([]);
     expect(settingsView(makeCtx(), false).querySelector('#add-panel')).toBeNull();
   });
+  it('impostazioni con le istruzioni del calendario aperte', async () => {
+    const el = settingsView(makeCtx(), false, true);
+    expect(el.querySelector<HTMLDetailsElement>('#calendar-section details.more')?.open).toBe(true);
+    expect(await violations(el)).toEqual([]);
+    expect(settingsView(makeCtx()).querySelector<HTMLDetailsElement>('#calendar-section details.more')?.open).toBe(false);
+  });
+  it('«Aggiungi al calendario» del giorno porta alle istruzioni dove webcal non funziona', () => {
+    const links = [...dayView(makeCtx(), '2026-11-10').querySelectorAll('a')];
+    // L'ambiente dei test non è un Apple: niente webcal, si va alle impostazioni.
+    expect(links.find((a) => a.getAttribute('href') === '#/settings/calendar')).toBeDefined();
+    expect(links.some((a) => a.getAttribute('href')?.startsWith('webcal:'))).toBe(false);
+  });
   it('riga dei profili in cima', async () => {
     const bar = profileBar(makeCtx())!;
     expect(await violations(bar)).toEqual([]);

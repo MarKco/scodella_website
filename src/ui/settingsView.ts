@@ -155,7 +155,8 @@ function myMenus(ctx: Ctx, addMode: boolean): HTMLElement {
   return box;
 }
 
-function calendarSection(ctx: Ctx): HTMLElement | null {
+/** `open`: istruzioni e indirizzo già visibili (si arriva dal pulsante del giorno su un dispositivo dove `webcal:` non funziona). */
+function calendarSection(ctx: Ctx, open: boolean): HTMLElement | null {
   const { i18n, model } = ctx;
   const menu = model.menu;
   if (!menu) return null;
@@ -163,13 +164,13 @@ function calendarSection(ctx: Ctx): HTMLElement | null {
   const how = (title: string, text: string) => [h('h3', { class: 'overline' }, i18n.t(title)), h('p', { class: 'muted' }, i18n.t(text))];
   return h(
     'section',
-    { class: 'card settings-section' },
-    h('h2', { class: 'card-title' }, i18n.t('cal_title')),
+    { class: 'card settings-section', id: 'calendar-section' },
+    h('h2', { class: 'card-title', id: 'calendar-title', tabindex: -1 }, i18n.t('cal_title')),
     h('p', { class: 'muted' }, i18n.t('cal_text')),
     h('a', { class: 'btn primary', href: webcalUrl(menu.id) }, i18n.t('cal_button')),
     h(
       'details',
-      { class: 'more' },
+      { class: 'more', open },
       h('summary', null, i18n.t('cal_more')),
       h('label', { class: 'field-label', for: 'cal-address' }, i18n.t('cal_address')),
       h('div', { class: 'copy-row' }, h('input', { id: 'cal-address', class: 'date-input', type: 'text', readonly: true, value: address }), h('button', { class: 'btn tonal', 'data-fk': 'cal-copy', onclick: () => void copy(ctx, address, 'cal_copied') }, i18n.t('cal_copy'))),
@@ -180,7 +181,7 @@ function calendarSection(ctx: Ctx): HTMLElement | null {
   );
 }
 
-export function settingsView(ctx: Ctx, addMode = false): HTMLElement {
+export function settingsView(ctx: Ctx, addMode = false, calendarOpen = false): HTMLElement {
   const { i18n, model, prefs } = ctx;
   const section = (title: string, ...children: (Node | false | null)[]) =>
     h('section', { class: 'card settings-section' }, h('h2', { class: 'card-title' }, title), ...children);
@@ -223,7 +224,7 @@ export function settingsView(ctx: Ctx, addMode = false): HTMLElement {
     ),
   );
 
-  const calendar = calendarSection(ctx);
+  const calendar = calendarSection(ctx, calendarOpen);
   if (calendar) colB.append(calendar);
 
   // App Android (assente su iPhone/iPad).

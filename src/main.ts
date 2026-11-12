@@ -124,7 +124,7 @@ function parseRoute(): Route {
   const [a, b] = parts;
   if (a === 'calendar') return { name: 'calendar', month: /^\d{4}-\d{2}$/.test(b ?? '') ? b : (lastDay ?? state.today).slice(0, 7) };
   if (a === 'stats') return { name: 'stats', period: (['7', '30', '90', 'year', 'all'].includes(b) ? b : 'year') as Period };
-  if (a === 'settings') return { name: 'settings', add: b === 'add-menu' };
+  if (a === 'settings') return { name: 'settings', add: b === 'add-menu', calendar: b === 'calendar' };
   if (a === 'family') return b && parseISO(b) ? { name: 'family', date: b } : { name: 'family', date: state.model.onOrAfter(state.today), fromToday: true };
   if (a && parseISO(a)) return { name: 'day', date: a };
   // Senza indirizzo: si riapre sull'ultima vista del giorno (con almeno 2 bambini può essere «Tutti»).
@@ -325,7 +325,7 @@ function render(): void {
       view = statsView(c, route.period);
       break;
     default:
-      view = settingsView(c, route.add);
+      view = settingsView(c, route.add, route.calendar);
   }
   if (route.name === 'day' || route.name === 'family') {
     if (lastDay && lastDay !== route.date) view.classList.add(route.date > lastDay ? 'from-right' : 'from-left');
@@ -336,6 +336,7 @@ function render(): void {
   appEl.querySelector('h1')?.setAttribute('tabindex', '-1');
   const changed = viewChanged(lastRoute, route);
   const enteringAdd = route.name === 'settings' && !!route.add && !(lastRoute?.name === 'settings' && lastRoute.add);
+  const enteringCalendar = route.name === 'settings' && !!route.calendar && !(lastRoute?.name === 'settings' && lastRoute.calendar);
   lastRoute = route;
   // Altra vista (o altro giorno): in cima. Stessa vista (un'opzione, un periodo): scroll e focus restano dove sono.
   window.scrollTo(0, changed ? 0 : prevScroll);
@@ -347,6 +348,11 @@ function render(): void {
     // Dalla scorciatoia «＋ Aggiungi»: il pannello è già aperto, in vista, col focus sul nome.
     document.getElementById('add-panel')?.scrollIntoView({ block: 'start' });
     appEl.querySelector<HTMLElement>('[data-fk="add-name"]')?.focus();
+  }
+  if (enteringCalendar) {
+    // Da «Aggiungi al calendario» (Android, Windows…): la sezione in vista, istruzioni aperte, focus sul suo titolo.
+    document.getElementById('calendar-section')?.scrollIntoView({ block: 'start' });
+    document.getElementById('calendar-title')?.focus({ preventScroll: true });
   }
   setTitle(route);
   syncUrl();

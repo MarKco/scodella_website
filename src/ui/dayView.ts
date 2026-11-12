@@ -4,6 +4,7 @@ import { addDays, isWeekend, mondayOf, toISO, type ISODate } from '../domain/dat
 import type { DishKind } from '../domain/types';
 import { lastDay } from '../domain/menus';
 import { webcalUrl } from '../links';
+import { opensWebcal } from '../platform';
 import type { Ctx } from './ctx';
 import { icon } from './icons';
 import { pill } from './components';
@@ -272,7 +273,9 @@ function shareRow(ctx: Ctx, date: ISODate): HTMLElement {
       icon('share', 18),
       i18n.t('share'),
     ),
-    ctx.model.menu && h('a', { class: 'btn text', href: webcalUrl(ctx.model.menu.id) }, icon('calendar', 18), i18n.t('cal_short')),
+    // Dove `webcal:` apre il calendario ci si iscrive subito; altrove si va alle istruzioni con l'indirizzo da copiare.
+    ctx.model.menu &&
+      h('a', { class: 'btn text', href: opensWebcal() ? webcalUrl(ctx.model.menu.id) : '#/settings/calendar' }, icon('calendar', 18), i18n.t('cal_button')),
   );
 }
 
