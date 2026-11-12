@@ -105,7 +105,7 @@ function addCard(ctx: Ctx): HTMLElement {
         onPick: (menu) => {
           addMenuId = menu.id;
           openMenuField.set('add', false);
-          ctx.patch({});
+          ctx.rerender();
         },
       }),
     h(

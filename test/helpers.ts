@@ -66,6 +66,7 @@ export function makeCtx(over: { prefs?: Partial<Prefs>; feed?: Feed; today?: str
     today,
     go: noop,
     patch: noop,
+    rerender: noop,
     setActiveProfile: noop,
     addProfile: noop,
     updateProfile: noop,

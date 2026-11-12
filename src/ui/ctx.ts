@@ -20,6 +20,8 @@ export interface Ctx {
   today: ISODate;
   go(path: string): void;
   patch(p: Partial<Prefs>): void;
+  /** Ridisegna la pagina senza cambiare le preferenze (bozze locali delle viste: schermata iniziale, pannello «Nuovo menu»). */
+  rerender(): void;
   /** Profili (bambino + menu, fino a `MAX_PROFILES`). I nomi restano solo sul dispositivo. */
   setActiveProfile(id: string): void;
   addProfile(init: { menuId: string; name?: string }): void;

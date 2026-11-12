@@ -81,9 +81,19 @@ function setPrefs(prefs: Prefs): void {
   update({ prefs });
 }
 
+/** Conta le richieste di cambio lingua: se ne arriva una nuova mentre si scarica il pack, la risposta vecchia si scarta. */
+let langRequest = 0;
+
 async function setLang(code: string): Promise<void> {
   if (!LANGS.some((l) => l.code === code)) return;
+  const request = ++langRequest;
   const pack = await loadPack(code);
+  if (request !== langRequest) return;
+  // Pack non scaricato (offline e non in cache): si resta sulla lingua attuale invece di salvarne una che si vedrebbe in inglese.
+  if (pack === EMPTY_PACK && code !== state.i18n.lang) {
+    toast(state.i18n.t('load_error'));
+    return;
+  }
   const prefs = { ...state.prefs, lang: code };
   savePrefs(prefs);
   update({ pack, prefs });
@@ -167,6 +177,7 @@ const ctx = (): Ctx => ({
     location.hash = `#${path}`;
   },
   patch: patchPrefs,
+  rerender: () => render(),
   // Dalla vista «Tutti», toccare un bambino porta alla sua pagina del giorno (lo stesso giorno).
   setActiveProfile: (id) => {
     const r = parseRoute();
@@ -296,13 +307,13 @@ let lastRoute: Route | null = null;
 
 function render(): void {
   applyTheme();
-  const c = ctx();
   // Prima di ridisegnare: cosa aveva il focus e dov'era lo scroll.
   const key = focusKey(appEl);
   const hadFocus = key !== null || (document.activeElement !== document.body && appEl.contains(document.activeElement));
   const prevScroll = window.scrollY;
   if (isWelcome()) {
     clear(appEl);
+    const c = ctx();
     const done = () => patchPrefs({ welcomed: true });
     // «Annulla» solo se c'è già qualcosa da conservare (si sta ripetendo la configurazione).
     appEl.append(h('div', { class: 'shell welcome-shell' }, h('main', { class: 'main' }, welcomeView(c, done, state.prefs.profiles.length ? done : undefined))));
@@ -321,13 +332,15 @@ function render(): void {
   const route = parseRoute();
   currentRoute = route;
   rememberStartView(route);
-  let view: HTMLElement = undefined as unknown as HTMLElement;
+  // Dopo `currentRoute`: il contesto deve sapere quale vista e quale giorno si stanno mostrando.
+  const c = ctx();
+  let view: HTMLElement;
   switch (route.name) {
     case 'day':
-      view = dayView(ctx(), route.date, route.fromToday ? state.today : undefined);
+      view = dayView(c, route.date, route.fromToday ? state.today : undefined);
       break;
     case 'family':
-      view = familyView(ctx(), route.date, route.fromToday ? state.today : undefined);
+      view = familyView(c, route.date, route.fromToday ? state.today : undefined);
       break;
     case 'calendar':
       view = calendarView(c, route.month);

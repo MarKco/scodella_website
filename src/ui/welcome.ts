@@ -38,7 +38,7 @@ export function welcomeView(ctx: Ctx, onDone: () => void, onCancel?: () => void)
         'div',
         { class: 'profile-card-head' },
         h('h2', { class: 'card-title' }, i18n.t('child_n', i + 1)),
-        i > 0 && h('button', { class: 'btn text', 'data-fk': `wl-remove-${i}`, onclick: () => { cards.splice(i, 1); ctx.patch({}); } }, i18n.t('profile_remove')),
+        i > 0 && h('button', { class: 'btn text', 'data-fk': `wl-remove-${i}`, onclick: () => { cards.splice(i, 1); ctx.rerender(); } }, i18n.t('profile_remove')),
       ),
       h(
         'label',
@@ -63,7 +63,7 @@ export function welcomeView(ctx: Ctx, onDone: () => void, onCancel?: () => void)
         open: d.open,
         onToggle: (o) => { d.open = o; },
         // Scelto il menu l'elenco si chiude: lascia spazio per aggiungere gli altri bambini.
-        onPick: (menu) => { d.menuId = menu.id; d.open = false; ctx.patch({}); },
+        onPick: (menu) => { d.menuId = menu.id; d.open = false; ctx.rerender(); },
       }),
     );
 
@@ -87,7 +87,7 @@ export function welcomeView(ctx: Ctx, onDone: () => void, onCancel?: () => void)
             // Si lavora sul bambino nuovo: il suo elenco dei menu è aperto, quelli degli altri sono chiusi.
             for (const c of cards) c.open = false;
             cards.push({ name: '', menuId: cards[cards.length - 1].menuId, open: true });
-            ctx.patch({});
+            ctx.rerender();
           },
         },
         i18n.t('profile_add_child'),
