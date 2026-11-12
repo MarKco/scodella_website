@@ -691,3 +691,10 @@ a.chip { text-decoration: none; }
 
 /* «Tutti»: niente colonna laterale, la tabella usa tutta la larghezza del contenuto */
 @media (min-width: 1024px) { .view.day.family { grid-template-columns: minmax(0, 1fr); grid-template-areas: 'main'; } }
+
+/* Chi chiede meno movimento al sistema: niente animazioni né transizioni (WCAG 2.3.3). */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+
+.noscript { padding: 1rem; }

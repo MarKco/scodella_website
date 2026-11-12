@@ -111,10 +111,21 @@ matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => stat
 let toastTimer = 0;
 function toast(message: string): void {
   document.querySelector('.toast')?.remove();
-  const el = h('div', { class: 'toast', role: 'status' }, message);
+  // Visibile per tutti; ai lettori di schermo lo dice `#announcer`, che esiste dall'avvio (una regione live inserita già piena
+  // spesso non viene letta).
+  const el = h('div', { class: 'toast', 'aria-hidden': 'true' }, message);
   document.body.append(el);
+  announce(message);
   clearTimeout(toastTimer);
   toastTimer = window.setTimeout(() => el.remove(), 3500);
+}
+
+/** Fa leggere `message` ai lettori di schermo dalla regione live `#announcer` (svuotata prima, così anche un testo ripetuto si legge). */
+function announce(message: string): void {
+  const live = document.getElementById('announcer');
+  if (!live) return;
+  live.textContent = '';
+  requestAnimationFrame(() => (live.textContent = message));
 }
 
 // --- routing ----------------------------------------------------------------------------------------------------
@@ -260,7 +271,7 @@ function shell(route: Route | null, view: HTMLElement): HTMLElement {
       { class: 'topbar' },
       h('img', { class: 'logo', src: `${import.meta.env.BASE_URL}icons/icon.svg`, alt: '', width: 32, height: 32 }),
       h('div', { class: 'topbar-text' }, h('div', { class: 'app-name' }, 'Scodella'), menu && h('div', { class: 'topbar-menu' }, state.model.names.menuTitle(menu))),
-      !navigator.onLine && h('span', { class: 'pill', role: 'status' }, c.i18n.t('offline').split(':')[0]),
+      !navigator.onLine && h('span', { class: 'pill', 'aria-hidden': 'true' }, c.i18n.t('offline').split(':')[0]),
     ),
     h(
       'main',
