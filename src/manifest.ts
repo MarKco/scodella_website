@@ -7,6 +7,8 @@ interface Base {
   data: Record<string, unknown> & { icons?: { src: string }[] };
 }
 let base: Base | null = null;
+/** L'ultimo manifest scritto: cambiare `href` fa rileggere il manifest al browser, quindi solo se è davvero diverso. */
+let lastHref = '';
 
 export async function initManifest(): Promise<void> {
   const link = document.querySelector<HTMLLinkElement>('link[rel="manifest"]');
@@ -32,5 +34,8 @@ export function updateManifest(search: string): void {
     start_url: startUrl,
     icons: (base.data.icons ?? []).map((i) => ({ ...i, src: abs(i.src) })),
   };
-  link.href = `data:application/manifest+json;charset=utf-8,${encodeURIComponent(JSON.stringify(m))}`;
+  const href = `data:application/manifest+json;charset=utf-8,${encodeURIComponent(JSON.stringify(m))}`;
+  if (href === lastHref) return;
+  lastHref = href;
+  link.href = href;
 }

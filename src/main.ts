@@ -101,15 +101,21 @@ async function setLang(code: string): Promise<void> {
 
 // --- tema -------------------------------------------------------------------------------------------------------
 
+/** Accento e modo dell'ultimo tema applicato: i colori si ricalcolano e si riscrivono solo se cambiano. */
+let appliedTheme = '';
+
 function applyTheme(): void {
   const { prefs, model } = state;
   const dark = prefs.theme === 'dark' || (prefs.theme === 'system' && matchMedia('(prefers-color-scheme: dark)').matches);
   const root = document.documentElement;
+  root.lang = state.i18n.lang;
+  const key = `${model.menu?.accent}|${dark}`;
+  if (key === appliedTheme) return;
+  appliedTheme = key;
   const vars = accentScheme(model.menu?.accent, dark);
   for (const [k, v] of Object.entries(vars)) root.style.setProperty(k, v);
   root.dataset.theme = dark ? 'dark' : 'light';
   root.style.colorScheme = dark ? 'dark' : 'light';
-  root.lang = state.i18n.lang;
   // Nell'HTML ci sono due meta (chiaro/scuro) per il primo paint: qui ne resta uno solo, che segue la scelta dell'utente.
   const metas = document.querySelectorAll('meta[name="theme-color"]');
   metas.forEach((m, i) => (i === 0 ? (m.removeAttribute('media'), m.setAttribute('content', vars['--background'])) : m.remove()));
