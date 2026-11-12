@@ -1,5 +1,5 @@
 import { h } from '../dom';
-import { toISO } from '../domain/dates';
+import { todayISO } from '../domain/dates';
 import type { DishEntry } from '../domain/content';
 import { findRecipe } from '../domain/recipes';
 import type { ISODate } from '../domain/dates';
@@ -27,7 +27,7 @@ export function openDishSheet(ctx: Ctx, e: DishEntry, date: ISODate): void {
 
   if (e.replaced) body.push(h('p', { class: 'muted' }, i18n.t('dish_replaced_original', ''), h('s', null, e.original)));
   if (e.deleted) body.push(h('p', { class: 'strong' }, i18n.t('dish_deleted')));
-  if (e.canteenAt) body.push(h('p', { class: 'muted small' }, i18n.t('dish_variation_note', i18n.dateLong(toISO(new Date(e.canteenAt))))));
+  if (e.canteenAt) body.push(h('p', { class: 'muted small' }, i18n.t('dish_variation_note', i18n.dateLong(todayISO(new Date(e.canteenAt))))));
   if (e.note && !e.deleted) body.push(h('p', { class: 'dish-note' }, e.note));
 
   const found = e.recipeKey && model.menu ? findRecipe(model.recipes(), model.menu, e.recipeKey) : null;

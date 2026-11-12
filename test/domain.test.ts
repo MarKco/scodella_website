@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { addDays, diffDays, isoWeekday, mondayOf } from '../src/domain/dates';
+import { addDays, diffDays, isoWeekday, mondayOf, todayISO } from '../src/domain/dates';
 import { assembleMenus, currentMenu, dishKey, effectiveMenus, lastDay, resolveDay, selectableSeasons } from '../src/domain/menus';
 import { effectiveMoves, effectiveVariations, moveSources, pickMessage, pickText, remoteClosures } from '../src/domain/feed';
 import { Model, type StaticData } from '../src/domain/model';
@@ -37,6 +37,17 @@ describe('date', () => {
     expect(isoWeekday('2026-11-02')).toBe(1); // lunedì
     expect(isoWeekday('2026-11-08')).toBe(7);
     expect(mondayOf('2026-11-08')).toBe('2026-11-02');
+  });
+  it('il giorno di un istante (es. una variazione) è quello italiano, non quello UTC', () => {
+    const tz = process.env.TZ;
+    process.env.TZ = 'Europe/Rome';
+    try {
+      // 23:30 UTC del 10 novembre = 00:30 dell'11 a Venezia.
+      expect(todayISO(new Date(Date.UTC(2026, 10, 10, 23, 30)))).toBe('2026-11-11');
+    } finally {
+      if (tz === undefined) delete process.env.TZ;
+      else process.env.TZ = tz;
+    }
   });
 });
 

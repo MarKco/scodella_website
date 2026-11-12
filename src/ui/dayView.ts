@@ -1,6 +1,6 @@
 import { h } from '../dom';
 import { badges, FOODS, type DishEntry, type Food } from '../domain/content';
-import { addDays, isWeekend, mondayOf, toISO, type ISODate } from '../domain/dates';
+import { addDays, isWeekend, mondayOf, todayISO, type ISODate } from '../domain/dates';
 import type { DishKind } from '../domain/types';
 import { lastDay } from '../domain/menus';
 import { webcalUrl } from '../links';
@@ -238,7 +238,7 @@ export function dayView(ctx: Ctx, date: ISODate, noticeFor?: ISODate): HTMLEleme
 
   const updated = content.entries.filter((e) => e.canteenAt).map((e) => e.canteenAt!);
   if (updated.length) {
-    main.append(h('p', { class: 'muted small' }, i18n.t('canteen_badge', i18n.dateShort(toISO(new Date(Math.max(...updated)))))));
+    main.append(h('p', { class: 'muted small' }, i18n.t('canteen_badge', i18n.dateShort(todayISO(new Date(Math.max(...updated)))))));
   }
   const lines = FOODS.filter((f) => ctx.prefs.foods.includes(f)).map((f) => streakLine(ctx, f, date));
   if (lines.some(Boolean)) side.append(h('div', { class: 'streaks' }, lines));
