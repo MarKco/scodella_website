@@ -1,6 +1,6 @@
 import { h } from '../dom';
 import { FOODS, type Food } from '../domain/content';
-import { calendarUrl, issueUrl, REPO, webcalUrl } from '../links';
+import { calendarUrl, CONTACT_EMAIL, issueUrl, REPO, webcalUrl } from '../links';
 import { MAX_PROFILES, NAME_MAX, profileLabels, type Profile, type ThemeChoice } from '../prefs';
 import type { Ctx } from './ctx';
 import { languagePicker, menuField, menuShortTitle, playBadge } from './components';
@@ -253,6 +253,7 @@ export function settingsView(ctx: Ctx, addMode = false): HTMLElement {
       h('p', { class: 'muted' }, `${updated}. ${i18n.t('feed_hint')}`),
       h('h3', { class: 'overline' }, i18n.t('info_privacy_web')),
       h('p', { class: 'muted' }, i18n.t('info_privacy_web_text')),
+      h('p', { class: 'muted contact' }, `${i18n.t('info_contact')}: `, h('a', { href: `mailto:${CONTACT_EMAIL}` }, CONTACT_EMAIL)),
       h(
         'p',
         { class: 'muted small links' },

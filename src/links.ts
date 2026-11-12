@@ -2,6 +2,9 @@ import type { ISODate } from './domain/dates';
 
 export const REPO = 'https://github.com/MarKco/scodella_website';
 
+/** Indirizzo pubblico di contatto (Impostazioni › Info). */
+export const CONTACT_EMAIL = 'info@scodella.eu';
+
 /** Indirizzo base del sito (con la barra finale), per link assoluti. */
 export const siteBase = (): string => `${location.origin}${import.meta.env.BASE_URL}`;
 

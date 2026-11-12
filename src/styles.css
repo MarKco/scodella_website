@@ -412,7 +412,7 @@ a.chip { text-decoration: none; }
 .settings-section details.more summary { cursor: pointer; min-height: 44px; display: flex; align-items: center; font-weight: 600; }
 .copy-row { display: flex; gap: 8px; margin: 4px 0 8px; }
 .copy-row .date-input { flex: 1; min-width: 0; max-width: none; text-align: left; }
-.settings-section .links a { text-decoration: underline; text-underline-offset: 2px; }
+.settings-section .links a, .settings-section .contact a { text-decoration: underline; text-underline-offset: 2px; }
 .settings-section .btn.primary { margin-top: 4px; }
 
 /* --- avviso app Android, offline ------------------------------------------------------------------------------- */
