@@ -1,7 +1,7 @@
 # Scodella – sito web
 
 Sito statico e PWA con i menu delle scuole dell'infanzia e primarie del Comune di Venezia: la versione web dell'app Android
-[Scodella](https://github.com/MarKco/scodella). Gira su GitHub Pages: **https://markco.github.io/scodella_website/**
+[Scodella](https://github.com/MarKco/scodella). Gira su GitHub Pages: **https://scodella.eu/**
 
 Sito indipendente, non affiliato al Comune di Venezia.
 
@@ -46,7 +46,7 @@ Sito indipendente, non affiliato al Comune di Venezia.
 
 ## Calendario in abbonamento
 
-L'Action genera ogni volta, prima del build, un file per ognuno dei 12 menu (`https://markco.github.io/scodella_website/calendars/<menu>.ics`)
+L'Action genera ogni volta, prima del build, un file per ognuno dei 12 menu (`https://scodella.eu/calendars/<menu>.ics`)
 con `npm run calendars` (script `scripts/build-calendars.ts`, che usa gli stessi moduli del sito: nessuna regola duplicata). Il file ha un
 evento «tutto il giorno» per ogni giorno di mensa, con i piatti, le variazioni («al posto di…»), gli spostamenti e le chiusure.
 
@@ -123,7 +123,7 @@ in `vite.config.ts` se serve.
 
 ```sh
 npm install
-npm run dev        # http://localhost:5173/scodella_website/
+npm run dev        # http://localhost:5173/
 npm test           # logica di dominio (rotazione A–E, variazioni, spostamenti, chiusure…) + decoder Firestore
 npm run build && npm run preview
 ```

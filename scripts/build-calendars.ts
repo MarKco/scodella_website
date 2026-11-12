@@ -1,5 +1,5 @@
 // Genera i calendari in abbonamento (.ics), uno per menu, in public/calendars/. Si lancia prima del build, dopo aver letto il feed:
-//   SITE_URL=https://markco.github.io/scodella_website/ npx vite-node scripts/build-calendars.ts
+//   SITE_URL=https://scodella.eu/ npx vite-node scripts/build-calendars.ts
 // (vite-node serve per importare direttamente i moduli TypeScript del sito.)
 import { mkdirSync, readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { join, resolve } from 'node:path';
@@ -11,7 +11,7 @@ import { EMPTY_FEED, EMPTY_PACK, type Feed, type MenuFile, type SeasonRecipes } 
 const root = resolve(__dirname, '..');
 const data = join(root, 'public/data');
 const out = join(root, 'public/calendars');
-const siteUrl = (process.env.SITE_URL ?? 'https://markco.github.io/scodella_website/').replace(/\/?$/, '/');
+const siteUrl = (process.env.SITE_URL ?? 'https://scodella.eu/').replace(/\/?$/, '/');
 const uidDomain = new URL(siteUrl).hostname;
 
 const read = <T>(f: string): T => JSON.parse(readFileSync(join(data, f), 'utf8')) as T;

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Scarica il feed della mensa da Firestore (REST) in public/data/feed.json, facendo il minimo di letture.
 //
-//   FIRESTORE_API_KEY=... node scripts/fetch-feed.mjs [--site-url https://markco.github.io/scodella_website/] [--force]
+//   FIRESTORE_API_KEY=... node scripts/fetch-feed.mjs [--site-url https://scodella.eu/] [--force]
 //
 // 1. legge `feed/meta` (1 lettura Firestore);
 // 2. confronta `version` con quella del feed.json già pubblicato sul sito;
@@ -19,7 +19,7 @@ const args = process.argv.slice(2);
 const flag = (n) => args.includes(n);
 const opt = (n, d) => (args.includes(n) ? args[args.indexOf(n) + 1] : d);
 
-const siteUrl = (opt('--site-url', process.env.SITE_URL ?? 'https://markco.github.io/scodella_website/')).replace(/\/?$/, '/');
+const siteUrl = (opt('--site-url', process.env.SITE_URL ?? 'https://scodella.eu/')).replace(/\/?$/, '/');
 const key = process.env.FIRESTORE_API_KEY;
 const out = join(resolve(dirname(fileURLToPath(import.meta.url)), '..'), 'public/data/feed.json');
 const base = `https://firestore.googleapis.com/v1/projects/${PROJECT}/databases/(default)/documents`;

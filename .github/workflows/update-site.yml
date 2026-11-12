@@ -57,9 +57,7 @@ jobs:
           FIRESTORE_API_KEY: ${{ secrets.FIRESTORE_API_KEY }}
           FORCE: ${{ inputs.force }}
         run: |
-          owner="${GITHUB_REPOSITORY_OWNER,,}"
-          repo="${GITHUB_REPOSITORY#*/}"
-          args=(--site-url "https://${owner}.github.io/${repo}/")
+          args=(--site-url "https://scodella.eu/")
           if [ "$FORCE" = "true" ]; then args+=(--force); fi
           node scripts/fetch-feed.mjs "${args[@]}"
 
@@ -75,9 +73,7 @@ jobs:
       - name: Genera i calendari (.ics)
         if: github.event_name != 'schedule' || steps.feed.outputs.changed == 'true'
         run: |
-          owner="${GITHUB_REPOSITORY_OWNER,,}"
-          repo="${GITHUB_REPOSITORY#*/}"
-          SITE_URL="https://${owner}.github.io/${repo}/" npm run calendars
+          SITE_URL="https://scodella.eu/" npm run calendars
 
       - name: Build
         if: github.event_name != 'schedule' || steps.feed.outputs.changed == 'true'

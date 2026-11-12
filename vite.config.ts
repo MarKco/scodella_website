@@ -2,8 +2,8 @@ import { readFileSync } from 'node:fs';
 import { defineConfig, type Plugin } from 'vitest/config';
 import { VitePWA } from 'vite-plugin-pwa';
 
-// Il sito sta su https://markco.github.io/scodella_website/ ; con un dominio proprio: BASE_PATH=/ npm run build
-const base = process.env.BASE_PATH ?? '/scodella_website/';
+// Il sito sta su https://scodella.eu/ (radice del dominio); per servirlo in una sottocartella: BASE_PATH=/sottocartella/ npm run build
+const base = process.env.BASE_PATH ?? '/';
 const version = (JSON.parse(readFileSync('./package.json', 'utf8')) as { version: string }).version;
 
 /**
