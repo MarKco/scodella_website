@@ -151,12 +151,12 @@ describe('nomi e interfaccia del menu «Senza maiale»', () => {
     const view = dayView(ctx, '2026-11-16');
     document.body.append(view);
     expect(view.textContent).toContain('Ricotta');
-    expect(view.textContent).toContain('Nel menu standard: Lonza di maiale con salsa alle carote');
+    expect(view.textContent).toContain('Sostituisce: Lonza di maiale con salsa alle carote');
     expect(view.querySelector<HTMLAnchorElement>('.derived-note a')?.href).toBe(NO_PORK_SOURCE);
     const result = await axe.run(view, { rules: { region: { enabled: false } } });
     expect(result.violations).toEqual([]);
     view.remove();
     // sulle giornate senza maiale non c'è «al posto di»
-    expect(dayView(ctx, '2026-11-10').textContent).not.toContain('Nel menu standard');
+    expect(dayView(ctx, '2026-11-10').textContent).not.toContain('Sostituisce');
   });
 });

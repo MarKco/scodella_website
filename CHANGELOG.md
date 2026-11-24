@@ -3,7 +3,7 @@
 ## Non ancora rilasciato
 - **Nuovo menu «Senza maiale»**, selezionabile come le altre diete (selettori, vista «Tutti», calendario .ics): è il menu standard e dove c'è un piatto
   di maiale si serve quello del menu «Senza carne», come indica il Comune di Venezia. Nei giorni interessati (oggi un lunedì ogni 5 settimane)
-  il piatto dice «Nel menu standard: …», e una nota spiega che il menu è ricostruito dal sito, con il link alla regola del Comune. Segue le variazioni
+  il piatto dice «Sostituisce: …» (con il nome del piatto standard barrato), e una nota spiega che il menu è ricostruito dal sito, con il link alla regola del Comune. Segue le variazioni
   e gli spostamenti comunicati per il menu standard. Testi in tutte le 7 lingue.
 
 ## 0.4.0
