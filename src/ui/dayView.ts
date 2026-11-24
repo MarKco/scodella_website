@@ -122,7 +122,7 @@ function dishRow(ctx: Ctx, e: DishEntry, date: ISODate): HTMLElement {
     h('div', { class: `dish-name${e.deleted ? ' struck' : ''}` }, e.deleted ? e.original : e.text),
     e.replaced && h('div', { class: 'dish-sub' }, i18n.t('dish_replaced_original', ''), h('s', null, e.original)),
     e.deleted && h('div', { class: 'dish-sub strong' }, i18n.t('dish_deleted')),
-    e.instead && h('div', { class: 'dish-sub' }, i18n.t('dish_diet_instead', e.instead)),
+    e.instead && h('div', { class: 'dish-sub' }, i18n.t('dish_diet_instead', ''), h('s', null, e.instead)),
     e.note && !e.deleted && h('div', { class: 'dish-note' }, e.note),
   );
   return h(
