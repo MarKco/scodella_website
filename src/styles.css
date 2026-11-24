@@ -264,13 +264,19 @@ h1:focus, .main:focus { outline: none; }
 .date-pick { flex: 1; min-width: 0; display: flex; justify-content: center; }
 .date-input { width: 100%; max-width: 12rem; min-width: 9.5rem; padding: 0 8px; text-align: center; }
 
-.dishes { padding: 0; }
-.dishes .dish { padding: 0 20px; }
-.dish + .dish > .dish-btn { border-top: 1px solid color-mix(in srgb, var(--outline-variant) 60%, transparent); }
+/* La riga occupa tutta la larghezza della card (il padding è nel bottone), così l'evidenziazione al passaggio arriva ai bordi e prende gli
+   angoli arrotondati della card; il separatore resta rientrato di 20px. */
+.dishes { padding: 0; overflow: hidden; }
+.dish { position: relative; }
+.dish + .dish::before {
+  content: ''; position: absolute; top: 0; left: 20px; right: 20px; height: 1px; pointer-events: none;
+  background: color-mix(in srgb, var(--outline-variant) 60%, transparent);
+}
 .dish-btn {
   width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 12px;
-  padding: 14px 0; border: 0; background: transparent; text-align: left;
+  padding: 14px 20px; border: 0; background: transparent; text-align: left;
 }
+.dish-btn:focus-visible { outline-offset: -3px; border-radius: var(--radius-s); }
 .dish:first-child .dish-btn { padding-top: 18px; }
 .dish:last-child .dish-btn { padding-bottom: 18px; }
 .dish-main { min-width: 0; }
@@ -523,7 +529,7 @@ a.chip { text-decoration: none; }
   .strip { display: none; }
   .day-head { padding-top: 24px; }
   .day-title { font-size: clamp(2.6rem, 3.6vw, 3.6rem); }
-  .dish-btn { padding: 16px 0; }
+  .dish-btn { padding: 16px 20px; }
   .dish-name { font-size: 1.4rem; }
   .dish-kind { font-size: 1.6rem; }
   .streaks { margin-top: 16px; }
@@ -579,7 +585,6 @@ a.chip { text-decoration: none; }
   .chip:hover:not(.on) { background: var(--surface-low); }
   .choice:hover:not(.on) { background: var(--surface-low); }
   .dish-btn:hover { background: color-mix(in srgb, var(--primary-container) 45%, transparent); }
-  .dishes .dish { border-radius: 0; }
   .cal-cell.has-menu:hover:not(.on) { background: var(--primary-container); }
   .week-card:is(a):hover:not(.on) { background: var(--surface-container); }
   .strip-day:not(.on):hover { background: var(--surface-low); }
