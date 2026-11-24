@@ -60,6 +60,8 @@ export interface DishEntry {
   slot: number;
   /** Portata del piatto del menu (non di quello che lo sostituisce): serve ad allinearlo tra menu diversi. */
   baseCategory: Category;
+  /** Nel menu «Senza maiale»: il piatto del menu standard che questo sostituisce (altrimenti `null`). */
+  instead: string | null;
 }
 
 export interface MovedDay {
@@ -75,6 +77,11 @@ export interface DayContent {
 }
 
 const ORDER: Category[] = ['PRIMO', 'SECONDO', 'CONTORNO', 'PANE', 'FRUTTA', 'DESSERT'];
+
+/** Ordinamento stabile per portata: l'ordine del PDF si mantiene dentro ogni portata. */
+export function sortByCategory(entries: DishEntry[]): DishEntry[] {
+  return entries.sort((a, b) => ORDER.indexOf(a.category) - ORDER.indexOf(b.category));
+}
 
 export function composeDay(
   day: DayMenu,
@@ -93,6 +100,7 @@ export function composeDay(
     const base = {
       slot,
       baseCategory: category,
+      instead: null,
       originalKey: key,
       original,
       note,
@@ -120,8 +128,7 @@ export function composeDay(
     }
     return { ...base, text: original, category, kind: info?.kind ?? null, replaced: false, deleted: false, eggs: info?.eggs ?? false, recipeKey: key };
   });
-  // Ordinamento stabile: l'ordine del PDF si mantiene dentro ogni portata.
-  entries.sort((a, b) => ORDER.indexOf(a.category) - ORDER.indexOf(b.category));
+  sortByCategory(entries);
   return {
     day,
     date: day.date,

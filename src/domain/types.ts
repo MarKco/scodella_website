@@ -46,6 +46,19 @@ export interface Menu {
   dietNote: string | null;
   order: number | null;
   restrictions: string[];
+  /**
+   * Menu che non ha una tabella propria ma si ricava da altri due della stessa stagione (es. «Senza maiale»: il menu standard, e dove c'è un
+   * piatto di maiale quello del menu «Senza carne»). Lo costruisce `assembleMenus`; `Model` ne compone i giorni.
+   */
+  derived?: DerivedMenu;
+}
+
+export interface DerivedMenu {
+  rule: 'NO_PORK';
+  /** Id del menu da cui si parte (il menu standard). */
+  base: string;
+  /** Id del menu da cui si prende il piatto al posto di quelli esclusi. */
+  substitute: string;
 }
 
 export interface DishInfo {

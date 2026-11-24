@@ -1,8 +1,9 @@
 // Lo stato derivato che l'interfaccia legge: menu scelto + dati statici + feed + lingua → contenuto di ogni giorno.
 import { addDays, isWeekend, type ISODate } from './dates';
-import { badges, composeDay, DisplayNames, hasFood, type DayContent, type Food } from './content';
+import { badges, composeDay, DisplayNames, hasFood, sortByCategory, type DayContent, type DishEntry, type Food } from './content';
 import { closureOn, effectiveMoves, effectiveVariations, moveSources, pickText, remoteClosures } from './feed';
-import { currentMenu, effectiveMenus, lastDay, resolveDay } from './menus';
+import { currentMenu, dishKey, effectiveMenus, lastDay, resolveDay } from './menus';
+import { servesPork } from './recipes';
 import { computeStreak, type StreakInfo } from './streak';
 import type { Closure, DishInfo, Feed, LangPack, Menu, RemoteClosure, SeasonRecipes } from './types';
 
@@ -26,11 +27,13 @@ export class Model {
   readonly names: DisplayNames;
   private readonly remote: RemoteClosure[];
   private readonly cache = new Map<ISODate, DayContent | null>();
+  /** I due menu da cui si compone un menu derivato (creati alla prima richiesta). */
+  private parts: { base: Model | null; substitute: Model | null } | null = null;
 
   constructor(
     readonly data: StaticData,
     readonly feed: Feed,
-    pack: LangPack,
+    private readonly pack: LangPack,
     readonly language: string,
     selectedMenuId: string | null,
     readonly today: ISODate,
@@ -74,9 +77,42 @@ export class Model {
     return result;
   }
 
+  /** I menu le cui variazioni della mensa riguardano questo: lui stesso o, per un menu derivato, quelli da cui nasce. */
+  get sources(): string[] {
+    const d = this.menu?.derived;
+    return d ? [d.base, d.substitute] : this.menu ? [this.menu.id] : [];
+  }
+
+  private sibling(id: string): Model | null {
+    return this.menus.some((m) => m.id === id) ? new Model(this.data, this.feed, this.pack, this.language, id, this.today) : null;
+  }
+
+  /**
+   * «Senza maiale»: il giorno del menu standard (con variazioni e spostamenti della mensa già applicati) in cui ogni piatto di maiale è
+   * sostituito da quello che il menu «Senza carne» prevede nella stessa posizione. Un piatto eliminato dalla mensa non si sostituisce
+   * (non si serve comunque). Un piatto fuori catalogo introdotto da una variazione si riconosce solo dal nome nella lingua in uso.
+   */
+  private computeDerived(date: ISODate): DayContent | null {
+    const rule = this.menu!.derived!;
+    this.parts ??= { base: this.sibling(rule.base), substitute: this.sibling(rule.substitute) };
+    const standard = this.parts.base?.content(date);
+    if (!standard) return null;
+    const alternative = this.parts.substitute?.content(date);
+    const recipes = this.recipes();
+    const entries = standard.entries.map((e): DishEntry => {
+      if (e.deleted) return e;
+      const key = e.recipeKey ?? (e.replaced ? dishKey(e.text) : e.originalKey);
+      if (!servesPork(recipes, key)) return e;
+      const other = alternative?.entries.find((x) => x.slot === e.slot);
+      return other ? { ...other, instead: e.text } : e;
+    });
+    return { ...standard, entries: sortByCategory(entries) };
+  }
+
   private compute(date: ISODate): DayContent | null {
     const menu = this.menu;
     if (!menu || this.closure(date)) return null;
+    if (menu.derived) return this.computeDerived(date);
     const moves = effectiveMoves(this.feed, menu.season);
     const day = resolveDay(menu, date, moveSources(moves));
     if (!day) return null;

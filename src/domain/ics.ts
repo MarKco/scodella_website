@@ -56,12 +56,13 @@ const utc = (ms: number): string => new Date(ms).toISOString().replace(/[-:]/g, 
 const compact = (d: ISODate): string => d.replace(/-/g, '');
 
 /** Per ogni giorno, l'ultimo `updatedAt` (ms) di ciò che lo riguarda nel feed: variazioni (anche ritirate), spostamenti, chiusure. */
-export function relatedStamps(feed: Feed, menuId: string, season: string, from: ISODate, to: ISODate): Map<ISODate, number> {
+export function relatedStamps(feed: Feed, menuIds: string | string[], season: string, from: ISODate, to: ISODate): Map<ISODate, number> {
+  const ids = Array.isArray(menuIds) ? menuIds : [menuIds];
   const stamps = new Map<ISODate, number>();
   const bump = (d: ISODate, t: number) => {
     if (t > (stamps.get(d) ?? 0)) stamps.set(d, t);
   };
-  for (const v of feed.variations) if (v.menuId === menuId) bump(v.date, v.updatedAt);
+  for (const v of feed.variations) if (ids.includes(v.menuId)) bump(v.date, v.updatedAt);
   for (const m of feed.moves) if (m.season === season) bump(m.date, m.updatedAt);
   for (const c of feed.config.closures ?? []) {
     if (c.to < c.from) continue;
@@ -86,7 +87,7 @@ export function buildCalendar(opts: CalendarOptions): string {
   if (!menu) throw new Error('nessun menu per il calendario');
   const feed = model.feed;
   const end = lastDay(menu);
-  const stamps = relatedStamps(feed, menu.id, menu.season, menu.validFrom, end);
+  const stamps = relatedStamps(feed, model.sources, menu.season, menu.validFrom, end);
   const dtstamp = utc(feed.updatedAt || opts.now || 0);
   const title = model.names.menuTitle(menu);
   const lines: string[] = [];
@@ -125,6 +126,7 @@ export function buildCalendar(opts: CalendarOptions): string {
       for (const e of c.entries) {
         if (e.deleted) desc.push(`• ${e.original} (non previsto)`);
         else if (e.replaced) desc.push(`• ${e.text} (al posto di ${e.original})`);
+        else if (e.instead) desc.push(`• ${e.text} (al posto di: ${e.instead})`);
         else desc.push(`• ${e.text}`);
       }
       desc.push('', `Settimana ${c.day.week} · ${model.names.menu(menu)}`);

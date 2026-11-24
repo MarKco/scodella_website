@@ -3,7 +3,6 @@ import { addDays, isoWeekday, type ISODate } from './dates';
 import type { Category } from './types';
 import { CATEGORIES } from './types';
 import type { Model } from './model';
-import { effectiveMoves, effectiveVariations } from './feed';
 
 export interface Counted {
   label: string;
@@ -39,9 +38,6 @@ export function computeStats(model: Model, from: ISODate, to: ISODate): Stats {
     dishPairs: [], mostReplaced: [], mostChosen: [], byCategory: {}, byWeekday: [0, 0, 0, 0, 0],
   };
   if (!menu) return stats;
-  const moves = effectiveMoves(model.feed, menu.season);
-  const applied = new Set([...moves.values()].map((m) => m.id));
-  const byDate = effectiveVariations(model.feed, menu.id, applied);
   const pairs = new Map<string, number>();
   const replacedMap = new Map<string, number>();
   const chosenMap = new Map<string, number>();
@@ -50,9 +46,9 @@ export function computeStats(model: Model, from: ISODate, to: ISODate): Stats {
     const content = model.content(d);
     if (!content) continue;
     stats.mensaDays++;
-    // Si contano solo le variazioni che si agganciano davvero a un piatto del giorno.
+    // Si contano solo le variazioni che si agganciano davvero a un piatto del giorno (i piatti variati sono proprio quelli).
     const changed = content.entries.filter((e) => e.replaced || e.deleted);
-    if (changed.length === 0 || !byDate.has(d)) continue;
+    if (changed.length === 0) continue;
     stats.daysWithChanges++;
     for (const e of changed) {
       if (e.deleted) {

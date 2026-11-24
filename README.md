@@ -44,9 +44,25 @@ Sito indipendente, non affiliato al Comune di Venezia.
   qui con `npm run sync` quando esce un menu nuovo (vedi sotto). Il sito si rideploya da solo al push.
 - Il browser ricontrolla il feed quando si riapre la pagina e ogni 10 minuti; offline mostra l'ultimo letto.
 
+## Il menu «Senza maiale»
+
+Il Comune non pubblica una tabella per chi non mangia maiale, ma scrive (pagina «Menù autunno-inverno»): «Per gli utenti con dieta no maiale, la
+sostituzione del piatto sarà quella prevista nella tabella menù no carne». Il sito lo ricostruisce con questa regola, **giorno per giorno**
+(`Model.computeDerived`, `src/domain/model.ts`): si parte dal menu standard con variazioni e spostamenti già applicati e, per ogni piatto di
+maiale, si serve quello che «Senza carne» prevede nella stessa posizione. La dieta non è in `menus.json`: `assembleMenus` la aggiunge a ogni
+stagione che ha un menu `no-carne` (`id` = `<stagione>--no-maiale`, `Menu.derived`), quindi compare da sola nei selettori, nella vista «Tutti» e
+nei calendari. Il nome tradotto sta nei testi del sito (`diet_no_pork_*`), non nei pacchetti dell'app (`withDerivedNames`).
+
+- **Cosa è «maiale»**: flag `CONTAINS_PORK` della ricetta, oppure parole come maiale, prosciutto, speck, salame, pancetta… nel nome del piatto o
+  negli ingredienti (`servesPork`, `src/domain/recipes.ts`). Un test (`test/no-pork.test.ts`) elenca i piatti del catalogo riconosciuti come
+  maiale e **fallisce** se ne compare uno nuovo: quando arriva una nuova stagione (`npm run sync`) controlla che l'elenco sia giusto.
+- **Limite**: un piatto fuori catalogo introdotto da una variazione della mensa si riconosce solo dal nome nella lingua in uso.
+- Nella pagina del giorno c'è una nota «ricostruito dal sito» con il link alla pagina del Comune (`NO_PORK_SOURCE`, `src/domain/derived.ts`):
+  se il Comune cambia indirizzo, aggiornalo lì.
+
 ## Calendario in abbonamento
 
-L'Action genera ogni volta, prima del build, un file per ognuno dei 12 menu (`https://scodella.eu/calendars/<menu>.ics`)
+L'Action genera ogni volta, prima del build, un file per ognuno dei 13 menu (`https://scodella.eu/calendars/<menu>.ics`)
 con `npm run calendars` (script `scripts/build-calendars.ts`, che usa gli stessi moduli del sito: nessuna regola duplicata). Il file ha un
 evento «tutto il giorno» per ogni giorno di mensa, con i piatti, le variazioni («al posto di…»), gli spostamenti e le chiusure.
 

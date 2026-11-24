@@ -2,6 +2,7 @@ import { h } from '../dom';
 import { badges, FOODS, type DishEntry, type Food } from '../domain/content';
 import { addDays, isWeekend, mondayOf, todayISO, type ISODate } from '../domain/dates';
 import type { DishKind } from '../domain/types';
+import { NO_PORK_SOURCE } from '../domain/derived';
 import { lastDay } from '../domain/menus';
 import { webcalUrl } from '../links';
 import { opensWebcal } from '../platform';
@@ -121,6 +122,7 @@ function dishRow(ctx: Ctx, e: DishEntry, date: ISODate): HTMLElement {
     h('div', { class: `dish-name${e.deleted ? ' struck' : ''}` }, e.deleted ? e.original : e.text),
     e.replaced && h('div', { class: 'dish-sub' }, i18n.t('dish_replaced_original', ''), h('s', null, e.original)),
     e.deleted && h('div', { class: 'dish-sub strong' }, i18n.t('dish_deleted')),
+    e.instead && h('div', { class: 'dish-sub' }, i18n.t('dish_diet_instead', e.instead)),
     e.note && !e.deleted && h('div', { class: 'dish-note' }, e.note),
   );
   return h(
@@ -235,6 +237,10 @@ export function dayView(ctx: Ctx, date: ISODate, noticeFor?: ISODate): HTMLEleme
     );
   }
   main.append(h('ul', { class: 'card dishes' }, content.entries.map((e) => dishRow(ctx, e, date))));
+  // «Senza maiale» non è una tabella del Comune: si dice che lo ricostruisce il sito e da quale regola.
+  if (model.menu?.derived) {
+    main.append(h('p', { class: 'muted small derived-note' }, i18n.t('no_pork_note'), ' ', h('a', { href: NO_PORK_SOURCE, target: '_blank', rel: 'noopener noreferrer' }, i18n.t('no_pork_source'))));
+  }
 
   const updated = content.entries.filter((e) => e.canteenAt).map((e) => e.canteenAt!);
   if (updated.length) {

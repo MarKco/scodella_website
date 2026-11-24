@@ -2,6 +2,7 @@ import './styles.css';
 import { registerSW } from 'virtual:pwa-register';
 import { loadFeed, loadPack, loadStatic } from './data';
 import { clear, h } from './dom';
+import { withDerivedNames } from './domain/derived';
 import { pickMessage } from './domain/feed';
 import { Model, type StaticData } from './domain/model';
 import { accentScheme } from './domain/theme';
@@ -58,12 +59,16 @@ let welcomeShown = false;
 function build(partial: Pick<State, 'data' | 'pack' | 'fallback' | 'feed' | 'feedOk' | 'prefs'>): State {
   const lang = partial.prefs.lang ?? detectLang();
   const today = currentToday();
+  const i18n = new I18n(lang, partial.pack, partial.fallback);
+  // I menu derivati («Senza maiale») hanno nomi del sito, non dell'app: si aggiungono al pacchetto della lingua.
+  const pack = withDerivedNames(partial.pack, partial.data.menus, (k) => i18n.t(k));
   return {
     ...partial,
+    pack,
     today,
     models: new Map(),
-    model: new Model(partial.data, partial.feed, partial.pack, lang, activeMenuId(partial.prefs), today),
-    i18n: new I18n(lang, partial.pack, partial.fallback),
+    model: new Model(partial.data, partial.feed, pack, lang, activeMenuId(partial.prefs), today),
+    i18n,
   };
 }
 

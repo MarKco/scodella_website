@@ -705,3 +705,6 @@ a.chip { text-decoration: none; }
 .privacy .card + .card, .privacy .privacy-intro + .card { margin-top: 12px; }
 .privacy .btn { margin-top: 16px; }
 .privacy-list { padding-inline-start: 1.2em; margin: 4px 0 8px; display: grid; gap: 4px; }
+
+.derived-note { margin-top: 12px; }
+.derived-note a { text-decoration: underline; text-underline-offset: 2px; }

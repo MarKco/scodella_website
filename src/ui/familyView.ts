@@ -106,6 +106,7 @@ export function familyView(ctx: Ctx, date: ISODate, noticeFor?: ISODate): HTMLEl
             varied && h('span', { class: 'tag-varied' }, i18n.t('varied_tag')),
             e.replaced && h('span', { class: 'fam-sub' }, i18n.t('dish_replaced_original', ''), h('s', null, e.original)),
             e.deleted && h('span', { class: 'fam-sub strong' }, i18n.t('dish_deleted')),
+            e.instead && h('span', { class: 'fam-sub' }, i18n.t('dish_diet_instead', e.instead)),
           ),
         );
       }),

@@ -76,7 +76,32 @@ export function assembleMenus(files: MenuFile[], onSkipped: (id: string, e: unkn
       onSkipped(f.id, e);
     }
   }
+  // «Senza maiale»: non c'è una tabella del Comune; la regola (pagina del Comune) è «la sostituzione è quella prevista nel menu senza carne».
+  for (const base of bases.values()) {
+    const noMeat = diets.find((d) => d.season === base.season && d.diet === 'no-carne');
+    if (noMeat) diets.push(noPork(base, noMeat));
+  }
   return [...bases.values(), ...diets];
+}
+
+/** Il menu «Senza maiale» di una stagione: i giorni li compone `Model` da `base` e `substitute`; qui solo l'anagrafica (in italiano). */
+function noPork(base: Menu, noMeat: Menu): Menu {
+  return {
+    id: `${base.id}--no-maiale`,
+    name: `${base.name} – Senza maiale`,
+    accent: base.accent,
+    validFrom: base.validFrom,
+    validTo: base.validTo,
+    weeks: base.weeks,
+    season: base.season,
+    diet: 'no-maiale',
+    dietLabel: 'Senza maiale',
+    dietNote: 'Il menu standard; al posto dei piatti di maiale, quelli del menu «Senza carne».',
+    // subito dopo «Senza carne»
+    order: noMeat.order === null ? null : noMeat.order + 0.5,
+    restrictions: [],
+    derived: { rule: 'NO_PORK', base: base.id, substitute: noMeat.id },
+  };
 }
 
 /** Ultimo giorno in cui il menu vale: `validTo`, altrimenti il 30 giugno dell'anno scolastico. */

@@ -1,6 +1,5 @@
 import { h } from '../dom';
 import { addDays, daysInMonth, isoWeekday, type ISODate } from '../domain/dates';
-import { effectiveMoves, effectiveVariations } from '../domain/feed';
 import type { Ctx } from './ctx';
 import { icon } from './icons';
 
@@ -31,10 +30,6 @@ export function monthGrid(ctx: Ctx, month: string, opts: GridOptions = {}): HTML
   const total = daysInMonth(year, m0);
   const monthName = i18n.month(year, m0);
 
-  const menu = model.menu;
-  const applied = menu ? new Set([...effectiveMoves(model.feed, menu.season).values()].map((x) => x.id)) : new Set<string>();
-  const changed = menu ? effectiveVariations(model.feed, menu.id, applied) : new Map();
-
   // Intestazione dei giorni: lunedì 2026-11-02 + i.
   const heads = [0, 1, 2, 3, 4, 5, 6].map((i) => {
     const d = addDays('2026-11-02', i);
@@ -48,7 +43,7 @@ export function monthGrid(ctx: Ctx, month: string, opts: GridOptions = {}): HTML
     const weekend = isoWeekday(d) >= 6;
     const closure = model.closure(d);
     const content = model.content(d);
-    const hasChange = (changed.get(d)?.size ?? 0) > 0 && !!content && content.entries.some((e) => e.replaced || e.deleted);
+    const hasChange = !!content && content.entries.some((e) => e.replaced || e.deleted);
     const names = content && opts.dishes ? content.entries.filter((e) => e.category === 'PRIMO' || e.category === 'SECONDO').slice(0, 2) : [];
     const cls = ['cal-cell', weekend && 'weekend', closure && !weekend && 'closed', d === ctx.today && 'today', d === opts.selected && 'on']
       .filter(Boolean)

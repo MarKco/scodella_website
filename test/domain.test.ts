@@ -61,7 +61,7 @@ describe('dishKey', () => {
 
 describe('menu', () => {
   it('assembla base e diete senza scartare nulla', () => {
-    expect(menus).toHaveLength(12);
+    expect(menus).toHaveLength(13); // 12 tabelle del Comune + «Senza maiale», che si ricava dal menu «Senza carne»
     expect(menus.filter((m) => m.diet === null)).toHaveLength(1);
     expect(noCarne.restrictions).toContain('MEAT');
   });
