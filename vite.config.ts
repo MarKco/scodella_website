@@ -40,7 +40,7 @@ const cspPlugin = (): Plugin => ({
 
 /**
  * Lo script di GoatCounter. `no_onload`: non conta da solo, perché conterebbe l'indirizzo con la sua parte `?…`, che all'avvio dall'icona
- * Home può contenere i nomi dei bambini (`names`, vedi urlstate.ts). Conta `src/main.ts` (`countVisit`), sempre come pagina «/».
+ * Home può contenere i nomi dei bambini (`names`, vedi urlstate.ts). Conta `src/analytics.ts` (`countVisit`), come pagina «/<lingua>».
  */
 const goatCounterPlugin = (): Plugin => ({
   name: 'scodella-goatcounter',

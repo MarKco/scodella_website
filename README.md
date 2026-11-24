@@ -177,7 +177,8 @@ L'app admin non può farlo senza tenere un token dentro l'app: per quella vale i
   riattiva il workflow.
 - **Privacy.** Niente cookie. Menu, lingua e nomi dei bambini stanno nel `localStorage` del browser. L'unico servizio di terzi è il
   contatore di visite [GoatCounter](https://www.goatcounter.com/) (senza cookie, anonimo): `src/analytics.ts` invia una visita come
-  pagina «/», senza la parte `?…` dell'indirizzo (menu, lingua e, all'avvio dall'icona Home, i nomi) e non invia nulla con «Do Not Track».
+  pagina «/<lingua>» (es. «/hi»: così in GoatCounter si legge quante visite per lingua), senza la parte `?…` dell'indirizzo (menu, lingua
+  e, all'avvio dall'icona Home, i nomi) e non invia nulla con «Do Not Track».
   Lo script c'è solo nella build; `GOATCOUNTER_URL=` (vuoto) lo toglie, un altro indirizzo usa un altro conto: **i fork devono impostare
   il proprio o spegnerlo**. L'informativa è `#/privacy` (`src/ui/privacyView.ts`, testi `priv_*` in tutte le lingue): se cambia ciò che
   il sito raccoglie o a chi lo manda, va aggiornata lì e `PRIVACY_UPDATED` con la data.

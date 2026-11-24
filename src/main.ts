@@ -565,7 +565,7 @@ async function boot(): Promise<void> {
   render();
   setupGestures();
   registerSW({ immediate: true });
-  countVisit();
+  countVisit(state.i18n.lang);
   // Le lingue diverse da it/en non sono nel precache: alla prima visita il pack si è scaricato prima che il service worker
   // controllasse la pagina, quindi lo si richiede una volta attraverso di lui perché resti disponibile offline.
   navigator.serviceWorker?.addEventListener('controllerchange', () => void loadPack(state.i18n.lang), { once: true });
