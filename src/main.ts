@@ -12,6 +12,7 @@ import { initManifest, updateManifest } from './manifest';
 import { isIos, isStandalone } from './platform';
 import { focusKey, restoreFocus } from './focus';
 import { activeMenuId, addProfile, loadPrefs, removeProfile, resetPrefs, savePrefs, setActive, setProfiles, updateProfile, type Prefs, type ThemeChoice } from './prefs';
+import { countVisit } from './analytics';
 import { mergeUrlState } from './startup';
 import { viewChanged, type Period, type Route } from './route';
 import { currentToday, simulatedToday } from './today';
@@ -22,6 +23,7 @@ import type { Ctx } from './ui/ctx';
 import { dayView } from './ui/dayView';
 import { familyView } from './ui/familyView';
 import { openDishSheet } from './ui/dishSheet';
+import { privacyView } from './ui/privacyView';
 import { icon } from './ui/icons';
 import { settingsView } from './ui/settingsView';
 import { statsView } from './ui/statsView';
@@ -151,6 +153,7 @@ function parseRoute(): Route {
   const [a, b] = parts;
   if (a === 'calendar') return { name: 'calendar', month: /^\d{4}-\d{2}$/.test(b ?? '') ? b : (lastDay ?? state.today).slice(0, 7) };
   if (a === 'stats') return { name: 'stats', period: (['7', '30', '90', 'year', 'all'].includes(b) ? b : 'year') as Period };
+  if (a === 'privacy') return { name: 'privacy' };
   if (a === 'settings') return { name: 'settings', add: b === 'add-menu', calendar: b === 'calendar' };
   if (a === 'family') return b && parseISO(b) ? { name: 'family', date: b } : { name: 'family', date: state.model.onOrAfter(state.today), fromToday: true };
   if (a && parseISO(a)) return { name: 'day', date: a };
@@ -223,8 +226,8 @@ const TABS = [
   { name: 'settings', icon: 'settings', label: 'nav_settings', href: '#/settings' },
 ] as const;
 
-/** Quale voce di navigazione è attiva: «Tutti i menu» sta sotto «Giorno». */
-const tabName = (r: Route | null) => (r?.name === 'family' ? 'day' : r?.name);
+/** Quale voce di navigazione è attiva: «Tutti i menu» sta sotto «Giorno», l'informativa sotto «Impostazioni». */
+const tabName = (r: Route | null) => (r?.name === 'family' ? 'day' : r?.name === 'privacy' ? 'settings' : r?.name);
 
 const THEME_CYCLE: ThemeChoice[] = ['system', 'light', 'dark'];
 const THEME_ICON: Record<ThemeChoice, string> = { system: '◐', light: '☀', dark: '☾' };
@@ -354,6 +357,9 @@ function render(): void {
     case 'stats':
       view = statsView(c, route.period);
       break;
+    case 'privacy':
+      view = privacyView(c);
+      break;
     default:
       view = settingsView(c, route.add, route.calendar);
   }
@@ -412,7 +418,9 @@ function setTitle(route: Route): void {
         ? i18n.month(+route.month.slice(0, 4), +route.month.slice(5, 7) - 1)
         : route.name === 'stats'
           ? i18n.t('nav_stats')
-          : i18n.t('nav_settings');
+          : route.name === 'privacy'
+            ? i18n.t('priv_title')
+            : i18n.t('nav_settings');
   document.title = `${title} · Scodella`;
   const live = document.getElementById('announcer');
   if (live && live.textContent !== title) live.textContent = title;
@@ -557,6 +565,7 @@ async function boot(): Promise<void> {
   render();
   setupGestures();
   registerSW({ immediate: true });
+  countVisit();
   // Le lingue diverse da it/en non sono nel precache: alla prima visita il pack si è scaricato prima che il service worker
   // controllasse la pagina, quindi lo si richiede una volta attraverso di lui perché resti disponibile offline.
   navigator.serviceWorker?.addEventListener('controllerchange', () => void loadPack(state.i18n.lang), { once: true });

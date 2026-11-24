@@ -115,7 +115,8 @@ in `vite.config.ts` se serve.
 - **Focus e scroll**: il sito ridisegna la pagina a ogni cambio di stato; i controlli che devono tenere il focus hanno `data-fk="…"` e
   `src/focus.ts` lo ripristina. Un controllo nuovo che cambia lo stato deve avere la sua chiave.
 - **CSP**: la build mette una Content-Security-Policy in un `<meta>` (`vite.config.ts`). Il sito non carica nulla da fuori: niente script,
-  stili o immagini inline e nessun servizio di terzi. Se serve una risorsa esterna va aggiunta lì, non con `unsafe-inline`.
+  stili o immagini inline; l'unico servizio di terzi ammesso è GoatCounter (`script-src`, `img-src`, `connect-src` ai suoi due domini).
+  Se serve un'altra risorsa esterna va aggiunta lì, non con `unsafe-inline`.
 - **Dati non fidati**: testi e messaggi del feed si inseriscono sempre come testo (mai `innerHTML`); gli indirizzi presi dai dati passano da
   `safeHttpUrl`; le preferenze salvate da `sanitizePrefs`.
 
@@ -174,7 +175,12 @@ L'app admin non può farlo senza tenere un token dentro l'app: per quella vale i
 - **Cron e inattività.** GitHub disattiva i workflow schedulati dopo 60 giorni senza attività nel repo. L'Action fa da sé un commit
   vuoto sul ramo `keepalive` ogni ~3 settimane per evitarlo. Se un giorno gli aggiornamenti si fermano, controlla *Actions* e
   riattiva il workflow.
-- **Privacy.** Niente cookie né analytics. Menu e lingua scelti stanno nel `localStorage` del browser.
+- **Privacy.** Niente cookie. Menu, lingua e nomi dei bambini stanno nel `localStorage` del browser. L'unico servizio di terzi è il
+  contatore di visite [GoatCounter](https://www.goatcounter.com/) (senza cookie, anonimo): `src/analytics.ts` invia una visita come
+  pagina «/», senza la parte `?…` dell'indirizzo (menu, lingua e, all'avvio dall'icona Home, i nomi) e non invia nulla con «Do Not Track».
+  Lo script c'è solo nella build; `GOATCOUNTER_URL=` (vuoto) lo toglie, un altro indirizzo usa un altro conto: **i fork devono impostare
+  il proprio o spegnerlo**. L'informativa è `#/privacy` (`src/ui/privacyView.ts`, testi `priv_*` in tutte le lingue): se cambia ciò che
+  il sito raccoglie o a chi lo manda, va aggiornata lì e `PRIVACY_UPDATED` con la data.
 - **Installazione.** Android/Chrome: *Impostazioni → Installa*. iPhone/iPad: Safari → Condividi → «Aggiungi alla schermata Home».
 - **Aggiornamenti del sito.** Il service worker scarica la nuova versione in background: si vede alla riapertura successiva.
 - **Dati.** I menu derivano dai PDF pubblici della Ristorazione scolastica del Comune di Venezia. Le variazioni le pubblica l'autore.

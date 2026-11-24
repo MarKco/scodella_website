@@ -254,6 +254,7 @@ export function settingsView(ctx: Ctx, addMode = false, calendarOpen = false): H
       h('p', { class: 'muted' }, `${updated}. ${i18n.t('feed_hint')}`),
       h('h3', { class: 'overline' }, i18n.t('info_privacy_web')),
       h('p', { class: 'muted' }, i18n.t('info_privacy_web_text')),
+      h('p', { class: 'muted contact' }, h('a', { href: '#/privacy', 'data-fk': 'privacy-link' }, i18n.t('info_privacy_link'))),
       h('p', { class: 'muted contact' }, `${i18n.t('info_contact')}: `, h('a', { href: `mailto:${CONTACT_EMAIL}` }, CONTACT_EMAIL)),
       h(
         'p',

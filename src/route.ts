@@ -12,7 +12,9 @@ export type Route =
    * `add`: arrivati dal «＋ Aggiungi» della riga in cima: il pannello per aggiungere un menu è già aperto.
    * `calendar`: arrivati da «Aggiungi al calendario» dove `webcal:` non funziona: la sezione Calendario ha già le istruzioni aperte.
    */
-  | { name: 'settings'; add?: boolean; calendar?: boolean };
+  | { name: 'settings'; add?: boolean; calendar?: boolean }
+  /** L'informativa sulla privacy: sta «sotto» le Impostazioni (da lì si apre). */
+  | { name: 'privacy' };
 
 /**
  * La vista è cambiata (altra pagina, o altro giorno): si torna in cima e, se l'utente stava usando un link, il focus passa al titolo.

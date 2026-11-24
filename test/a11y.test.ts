@@ -8,6 +8,7 @@ import { openSheet, profileBar } from '../src/ui/components';
 import { calendarView } from '../src/ui/calendarView';
 import { dayView } from '../src/ui/dayView';
 import { openDishSheet } from '../src/ui/dishSheet';
+import { privacyView } from '../src/ui/privacyView';
 import { familyView } from '../src/ui/familyView';
 import { settingsView } from '../src/ui/settingsView';
 import { statsView } from '../src/ui/statsView';
@@ -70,6 +71,18 @@ describe('accessibilità (axe-core)', () => {
     expect(el.querySelector('#add-panel')).not.toBeNull();
     expect(await violations(el)).toEqual([]);
     expect(settingsView(makeCtx(), false).querySelector('#add-panel')).toBeNull();
+  });
+  it('informativa sulla privacy, in italiano e in inglese', async () => {
+    for (const lang of ['it', 'en'] as const) {
+      const el = privacyView(makeCtx({ lang }));
+      expect(el.querySelector('h1')).not.toBeNull();
+      expect(await violations(el)).toEqual([]);
+    }
+    // Niente chiavi grezze: ogni testo c'è, in ogni lingua del sito.
+    expect(privacyView(makeCtx()).textContent).not.toMatch(/priv_|info_contact/);
+  });
+  it('le impostazioni rimandano all’informativa', () => {
+    expect(settingsView(makeCtx()).querySelector('a[href="#/privacy"]')).not.toBeNull();
   });
   it('impostazioni con le istruzioni del calendario aperte', async () => {
     const el = settingsView(makeCtx(), false, true);

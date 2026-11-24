@@ -7,17 +7,25 @@ const base = process.env.BASE_PATH ?? '/';
 const version = (JSON.parse(readFileSync('./package.json', 'utf8')) as { version: string }).version;
 
 /**
+ * Contatore di visite GoatCounter (senza cookie). Indirizzo del tuo conto; `GOATCOUNTER_URL=` (vuoto) lo spegne: i fork per altri comuni
+ * devono usare il proprio conto o nessuno, altrimenti conterebbero le visite sul tuo. Solo in build: in sviluppo e nei test non si conta.
+ */
+const goatCounter = (process.env.GOATCOUNTER_URL ?? 'https://scodella.goatcounter.com/count').trim();
+const GC_SCRIPT = 'https://gc.zgo.at';
+const gcOrigin = goatCounter ? new URL(goatCounter).origin : '';
+
+/**
  * Content-Security-Policy come <meta> (GitHub Pages non permette header). Il sito non carica nulla da fuori: script, stili, font, immagini
  * e dati sono tutti dello stesso sito; il manifest `data:` serve all'icona Home di iPhone (vedi src/manifest.ts). Solo in produzione:
  * il server di sviluppo di Vite usa script inline. (`frame-ancestors` non si può dichiarare in un <meta>.)
  */
 const CSP = [
   "default-src 'none'",
-  "script-src 'self'",
+  `script-src 'self'${goatCounter ? ` ${GC_SCRIPT}` : ''}`,
   "style-src 'self'",
-  "img-src 'self' data:",
+  `img-src 'self' data:${gcOrigin ? ` ${gcOrigin}` : ''}`,
   "font-src 'self'",
-  "connect-src 'self'",
+  `connect-src 'self'${gcOrigin ? ` ${gcOrigin}` : ''}`,
   "manifest-src 'self' data:",
   "worker-src 'self'",
   "base-uri 'self'",
@@ -30,6 +38,19 @@ const cspPlugin = (): Plugin => ({
   transformIndexHtml: (html) => html.replace('<meta charset="UTF-8" />', `<meta charset="UTF-8" />\n    <meta http-equiv="Content-Security-Policy" content="${CSP}" />`),
 });
 
+/**
+ * Lo script di GoatCounter. `no_onload`: non conta da solo, perché conterebbe l'indirizzo con la sua parte `?…`, che all'avvio dall'icona
+ * Home può contenere i nomi dei bambini (`names`, vedi urlstate.ts). Conta `src/main.ts` (`countVisit`), sempre come pagina «/».
+ */
+const goatCounterPlugin = (): Plugin => ({
+  name: 'scodella-goatcounter',
+  apply: 'build',
+  transformIndexHtml: (html) =>
+    goatCounter
+      ? html.replace('</head>', `  <script data-goatcounter="${goatCounter}" data-goatcounter-settings='{"no_onload":true}' async src="${GC_SCRIPT}/count.js"></script>\n  </head>`)
+      : html,
+});
+
 export default defineConfig({
   base,
   define: { __APP_VERSION__: JSON.stringify(version) },
@@ -37,6 +58,7 @@ export default defineConfig({
   test: { environment: 'node', include: ['test/**/*.test.{ts,mjs}'] },
   plugins: [
     cspPlugin(),
+    goatCounterPlugin(),
     VitePWA({
       registerType: 'autoUpdate',
       // Le icone sono già in globPatterns: senza questo finirebbero due volte nel precache.
