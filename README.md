@@ -9,7 +9,7 @@ Sito indipendente, non affiliato al Comune di Venezia.
 
 - Menu del giorno (swipe o frecce, striscia lun–ven, settimana A–E, link diretto `#/2026-11-12`), calendario del mese e
   variazioni del periodo.
-- Variazioni di piatto, spostamenti di giorno, chiusure e messaggi pubblicati dalla mensa.
+- Variazioni di piatto, spostamenti di giorno, chiusure e messaggi pubblicati dalla mensa. Un messaggio con `--max-version` (per le vecchie versioni dell'app Android) il sito non lo mostra; `--min-version` lo ignora.
 - Piatti con ingredienti e allergeni (senza grammature). Menu standard e diete speciali.
 - **Layout responsive**: telefono (colonna con barra in basso), tablet (colonna larga) e desktop da 1024 px (barra laterale,
   giorno + mini calendario, intera settimana sotto, calendario con i piatti nelle celle, foglio del piatto come pannello laterale).

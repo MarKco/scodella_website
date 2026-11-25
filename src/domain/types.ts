@@ -107,6 +107,9 @@ export interface RemoteMessage {
   body?: Texts;
   from?: number | null;
   to?: number | null;
+  /** Limiti di versione dell'app Android: il sito non ha versione, ma un `maxVersionCode` marca un messaggio per le vecchie versioni dell'app. */
+  minVersionCode?: number | null;
+  maxVersionCode?: number | null;
   active: boolean;
   updatedAt: number;
 }

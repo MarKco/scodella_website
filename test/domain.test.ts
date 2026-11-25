@@ -149,6 +149,10 @@ describe('feed', () => {
     expect(pickMessage([msg({ to: 5 })], 10, 'it', new Set())).toBeNull();
     expect(pickMessage([msg({ from: 20 })], 10, 'it', new Set())).toBeNull();
     expect(pickMessage([msg({ active: false })], 10, 'it', new Set())).toBeNull();
+    // Limiti di versione dell'app: «da la 17 in poi» vale anche per il sito; «fino alla 16» è per le vecchie app e il sito lo salta.
+    expect(pickMessage([msg({ minVersionCode: 17 })], 10, 'it', new Set())).toEqual({ version: 'm@5', title: 'T', body: 'B' });
+    expect(pickMessage([msg({ maxVersionCode: 16 })], 10, 'it', new Set())).toBeNull();
+    expect(pickMessage([msg({ maxVersionCode: 16, id: 'old' }), msg({ id: 'new', updatedAt: 9 })], 10, 'it', new Set())).toEqual({ version: 'new@9', title: 'T', body: 'B' });
   });
 });
 

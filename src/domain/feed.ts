@@ -65,7 +65,10 @@ export function effectiveVariations(
   return result;
 }
 
-/** Il primo messaggio attivo, nella sua finestra, non ancora chiuso. Ignora i limiti di versione (sono per l'app Android). */
+/**
+ * Il primo messaggio attivo, nella sua finestra, non ancora chiuso. Un messaggio con `maxVersionCode` è per le vecchie versioni dell'app
+ * Android («aggiorna per avere…»): il sito non lo mostra. `minVersionCode` si ignora: il sito è sempre l'ultima versione.
+ */
 export function pickMessage(
   messages: RemoteMessage[],
   now: number,
@@ -73,7 +76,7 @@ export function pickMessage(
   dismissed: Set<string>,
 ): { version: string; title: string; body: string } | null {
   const sorted = messages
-    .filter((m) => m.active && !dismissed.has(`${m.id}@${m.updatedAt}`))
+    .filter((m) => m.active && m.maxVersionCode == null && !dismissed.has(`${m.id}@${m.updatedAt}`))
     .filter((m) => (m.from ?? -Infinity) <= now && now <= (m.to ?? Infinity))
     .sort((a, b) => a.updatedAt - b.updatedAt);
   for (const m of sorted) {
