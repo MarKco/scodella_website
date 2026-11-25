@@ -191,6 +191,9 @@ L'app admin non può farlo senza tenere un token dentro l'app: per quella vale i
 - **Cron e inattività.** GitHub disattiva i workflow schedulati dopo 60 giorni senza attività nel repo. L'Action fa da sé un commit
   vuoto sul ramo `keepalive` ogni ~3 settimane per evitarlo. Se un giorno gli aggiornamenti si fermano, controlla *Actions* e
   riattiva il workflow.
+- **Deploy fallito.** Il workflow ha due job: `build` (test, build, caricamento dell'artefatto) e `deploy` (solo pubblicazione). Se `deploy` fallisce
+  con «No artifacts named github-pages» o «Multiple artifacts», **non** usare «Re-run failed jobs» (ricaricherebbe l'artefatto nello stesso
+  run): avvia un run nuovo con `gh workflow run update-site.yml`.
 - **Privacy.** Niente cookie. Menu, lingua e nomi dei bambini stanno nel `localStorage` del browser. L'unico servizio di terzi è il
   contatore di visite [GoatCounter](https://www.goatcounter.com/) (senza cookie, anonimo): `src/analytics.ts` invia una visita come
   pagina «/<lingua>» (es. «/hi»: così in GoatCounter si legge quante visite per lingua), senza la parte `?…` dell'indirizzo (menu, lingua

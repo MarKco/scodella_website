@@ -6,8 +6,13 @@ name: Aggiorna sito
 #  - lo chiedi a mano o lo script di pubblicazione dell'app (gh workflow run update-site.yml).
 # Nessun secret oltre alla chiave API di sola lettura FIRESTORE_API_KEY (vedi README). Il deploy usa il GITHUB_TOKEN automatico.
 #
-# Sicurezza: ogni job ha solo i permessi che gli servono (il job che installa i pacchetti npm e compila non può scrivere sul repo; solo il
-# keepalive può, e non esegue codice di terzi) e le azioni sono fissate allo SHA del commit, non a un tag che qualcuno potrebbe spostare.
+# Sicurezza: ogni job ha solo i permessi che gli servono e le azioni sono fissate allo SHA del commit, non a un tag che qualcuno potrebbe
+# spostare. `build` installa i pacchetti npm ed esegue i test: può solo leggere il codice (nessun permesso di pubblicare né di scrivere sul
+# repo). `deploy` ha i permessi per pubblicare su Pages ma non scarica né esegue codice del progetto: pubblica soltanto l'artefatto già
+# costruito. Solo il keepalive può scrivere sul repo, e non esegue codice di terzi.
+#
+# Perché due job: pubblicare subito dopo aver caricato l'artefatto, nello stesso job, falliva a volte con «No artifacts named github-pages»
+# (l'API di GitHub non lo vedeva ancora). Con un job a parte l'artefatto è già disponibile quando `deploy` parte.
 # Le versioni si aggiornano con le pull request di Dependabot (.github/dependabot.yml): il commento accanto allo SHA dice quale versione è.
 
 on:
@@ -28,19 +33,20 @@ on:
 permissions:
   contents: read
 
+# Un solo aggiornamento alla volta (build e pubblicazione insieme): due esecuzioni in parallelo potrebbero pubblicare un feed più vecchio
+# sopra uno più nuovo. Quella in corso non si interrompe; di quelle in attesa resta solo la più recente.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
     permissions:
       contents: read # il codice si legge soltanto
-      pages: write # pubblicare su GitHub Pages
-      id-token: write # richiesto da deploy-pages
-    concurrency:
-      group: pages
-      cancel-in-progress: false
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+    outputs:
+      # Con il solo cron e nessuna novità nel feed non si costruisce né si pubblica niente.
+      publish: ${{ github.event_name != 'schedule' || steps.feed.outputs.changed == 'true' }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -79,17 +85,26 @@ jobs:
         if: github.event_name != 'schedule' || steps.feed.outputs.changed == 'true'
         run: npm run build
 
-      - uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
-        if: github.event_name != 'schedule' || steps.feed.outputs.changed == 'true'
-
       - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         if: github.event_name != 'schedule' || steps.feed.outputs.changed == 'true'
         with:
           path: dist
 
+  deploy:
+    needs: build
+    if: needs.build.outputs.publish == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write # pubblicare su GitHub Pages
+      id-token: write # richiesto da deploy-pages
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
+
       - name: Pubblica su GitHub Pages
         id: deployment
-        if: github.event_name != 'schedule' || steps.feed.outputs.changed == 'true'
         uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
 
   # GitHub disattiva i workflow schedulati dopo 60 giorni senza attività nel repo. Un commit vuoto sul ramo `keepalive` ogni ~3 settimane
